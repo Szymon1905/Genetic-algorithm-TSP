@@ -15,6 +15,11 @@ extern int global_liczba_miast;
 extern int startowa_wielkosc_populacji;
 extern vector<vector<int>> global_macierz;
 
+
+// inicjajca generatora liczb losowych
+random_device rd;
+mt19937 gen(rd());
+
 class Osobnik {
 public:
     vector<int> droga;
@@ -69,10 +74,6 @@ void generuj_startowa_populacja() {
         pula_miast.push_back(i);
     }
 
-    // inicjajca generatora liczb losowych
-    random_device rd;
-    mt19937 gen(rd());
-
     // zerowanie populacji przy restarcie
     populacja.clear();
 
@@ -108,6 +109,44 @@ void ocena_populacji(){
     }
 }
 
+vector<Osobnik> wybranie_rodzicow(){
+
+    // Obliczenie sumy wartości funkcji celu (czyli drogi) dla wszystkich osobników
+    int suma_drog = 0;
+    for (Osobnik& osobnik : populacja) {
+        suma_drog = suma_drog + osobnik.dlugosc_drogi;
+    }
+
+    // Inicjalizacja pustej listy wybranych rodziców
+    vector<Osobnik> wybrani;
+
+
+    uniform_int_distribution<> distribution(0, suma_drog);
+
+
+    //sprawdzenie czy populacja nie jest pusta
+    if (populacja.empty()){
+        return wybrani;
+    }
+
+
+    // todo czy wybranie osobnika kilka razy jest poprawne ?
+    // Wybieranie rodziców
+    for (int i = 0; i < int(populacja.size()/5); i++) {
+        int suma = 0;
+        int los = distribution(gen);
+
+        for (Osobnik& osobnik : populacja) {
+            suma += osobnik.dlugosc_drogi;
+            if (suma >= los){
+                wybrani.push_back(osobnik);
+                break;
+            }
+        }
+    }
+
+    return wybrani;
+}
 
 vector<int> genetyczny(int czas){
     vector<int> a;
@@ -127,7 +166,10 @@ vector<int> genetyczny(int czas){
     ocena_populacji();
 
     while(chrono::high_resolution_clock::now() < stop){
+
         ocena_populacji();
+
+        populacja = wybranie_rodzicow();
     }
 
     // wypisanie najlepszego
