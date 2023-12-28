@@ -17,12 +17,12 @@ extern vector<vector<int>> global_macierz;
 
 class Osobnik {
 public:
-    vector<int> trasa;
-    int dlugosc_trasy;
+    vector<int> droga;
+    int dlugosc_drogi;
 
     Osobnik(vector<int> trasa, int dlugosc_trasy){
-        this->trasa = trasa;
-        this->dlugosc_trasy = dlugosc_trasy;
+        this->droga = trasa;
+        this->dlugosc_drogi = dlugosc_trasy;
     }
 };
 
@@ -38,11 +38,11 @@ void wypisz_najlepsze(){
     cout<<endl;
     cout<<endl;
     cout << "Finalna Droga: ";
-    for (int elem: najlepsze_rozwionzanie) {
+    for (int elem: najlepszy_osobnik.droga) {
         cout << elem << " ";
     }
     cout << endl;
-    cout << "Finalny Koszt: " << najlepsza_dlugosc;
+    cout << "Finalny Koszt: " << najlepszy_osobnik.dlugosc_drogi;
     cout<<endl;
     cout<<endl;
 }
@@ -79,7 +79,8 @@ void generuj_startowa_populacja() {
     // generowanie metodą shuffle losowych permutacji miast oraz wkładanie ich do populacji
     for (int i = 0; i < startowa_wielkosc_populacji; i++) {
         shuffle(pula_miast.begin(), pula_miast.end(), gen);
-        populacja.push_back(pula_miast);
+        Osobnik osobnik = Osobnik(pula_miast, oblicz_koszt_drogi(pula_miast,global_macierz));
+        populacja.push_back(osobnik);
     }
 }
 
@@ -92,38 +93,21 @@ int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> maci
 }
 
 void ocena_populacji(){
-    int droga;
-    for (const vector<int>& elem : populacja){
+    int dlugosc_drogi;
+    for (const Osobnik& elem : populacja){
 
         // obliczenie kosztu drogi
-        droga = oblicz_koszt_drogi(elem, global_macierz);
+        dlugosc_drogi = oblicz_koszt_drogi(elem.droga, global_macierz);
 
         // ocena rozwiązania
-        if ( droga < najlepsza_dlugosc ){
+        if ( dlugosc_drogi < najlepszy_osobnik.dlugosc_drogi ){
 
-            // aktualizacja najlepszego rozwiązania dla przeżywalności
-            najlepsza_dlugosc = droga;
-            najlepsze_rozwionzanie = elem;
+            // aktualizacja najlepszego osobnika / rozwiązania dla przeżywalności
+            najlepszy_osobnik = elem;
         }
     }
 }
 
-void ocena_populacji(){
-    int droga;
-    for (const vector<int>& elem : populacja){
-
-        // obliczenie kosztu drogi
-        droga = oblicz_koszt_drogi(elem, global_macierz);
-
-        // ocena rozwiązania
-        if ( droga < najlepsza_dlugosc ){
-
-            // aktualizacja najlepszego rozwiązania dla przeżywalności
-            najlepsza_dlugosc = droga;
-            najlepsze_rozwionzanie = elem;
-        }
-    }
-}
 
 vector<int> genetyczny(int czas){
     vector<int> a;

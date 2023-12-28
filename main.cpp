@@ -18,7 +18,7 @@ using namespace std;
 int global_liczba_miast;
 vector<vector<int>> global_macierz;
 
-int czas;
+int czas=6;
 int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
 float wsp_krzyzowania = 0.8;
