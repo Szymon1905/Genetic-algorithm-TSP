@@ -1,0 +1,20 @@
+# ninja log v5
+4	3583	7254840805987537	CMakeFiles/PEA_genetyczny.dir/main.cpp.obj	55976171b63ce19f
+4	2616	7254836543195470	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+3583	3822	7254840808157544	PEA_genetyczny.exe	aedea4d57c984fe6
+16	2622	7254852029477100	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+10	3721	7254852040397086	CMakeFiles/PEA_genetyczny.dir/main.cpp.obj	55976171b63ce19f
+3721	3999	7254852042827152	PEA_genetyczny.exe	aedea4d57c984fe6
+4	3596	7254852635877053	CMakeFiles/PEA_genetyczny.dir/main.cpp.obj	55976171b63ce19f
+3597	3846	7254852638187157	PEA_genetyczny.exe	aedea4d57c984fe6
+9	2512	7254854139787085	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+5	3551	7254854150127095	CMakeFiles/PEA_genetyczny.dir/main.cpp.obj	55976171b63ce19f
+3551	3789	7254854152347096	PEA_genetyczny.exe	aedea4d57c984fe6
+4	2453	7254854935497105	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+2455	2711	7254854937817158	PEA_genetyczny.exe	aedea4d57c984fe6
+4	2446	7254858447245571	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+2446	2721	7254858449745628	PEA_genetyczny.exe	aedea4d57c984fe6
+9	2464	7254858701055590	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+2466	2722	7254858703365595	PEA_genetyczny.exe	aedea4d57c984fe6
+7	2524	7254861247745578	CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj	50a9a2f24872b072
+2526	2791	7254861250135599	PEA_genetyczny.exe	aedea4d57c984fe6
