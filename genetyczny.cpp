@@ -29,6 +29,8 @@ public:
         this->droga = trasa;
         this->dlugosc_drogi = dlugosc_trasy;
     }
+
+    Osobnik(){}
 };
 
 vector<Osobnik> populacja;
@@ -146,6 +148,41 @@ vector<Osobnik> wybranie_rodzicow(){
     }
 
     return wybrani;
+}
+
+Osobnik krzyzowanie_OX(const Osobnik& rodzic1, const Osobnik& rodzic2){
+    Osobnik potomek;
+    int rozmiar_drogi = int(populacja[0].droga.size());
+
+    std::uniform_int_distribution<> distribution(0, rozmiar_drogi - 1);
+    int punkt1 = distribution(gen);
+    int punkt2 = distribution(gen);
+
+    // Upewnienie się, że punkt1 < punkt2
+    if (punkt1 > punkt2) {
+        swap(punkt1, punkt2);
+    }
+
+    // wypełn inie potomka -1 (puste pole)
+    for (int i = 0; i < rozmiar_drogi; i++) {
+        potomek.droga.push_back(-1);
+    }
+
+    // wstawienie miast do potomka od rodzica pomiędzy punktami cięcia
+    for (int i = punkt1; i <= punkt2; i++) {
+        potomek.droga[i] = rodzic1.droga[i];
+    }
+
+
+    // Wypełnienie potomka miastami z rodzica 2 w kolejności
+    for (int i = 0; i < rozmiar_drogi; i++) {
+        if(potomek.droga[i] != -1){
+            potomek.droga[i] = rodzic2.droga[i];
+        }
+    }
+
+
+    return potomek;
 }
 
 vector<int> genetyczny(int czas){
