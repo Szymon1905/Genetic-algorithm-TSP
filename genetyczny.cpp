@@ -13,7 +13,9 @@
 
 extern int global_liczba_miast;
 extern int startowa_wielkosc_populacji;
+extern float wsp_krzyzowania;
 extern vector<vector<int>> global_macierz;
+
 
 
 // inicjajca generatora liczb losowych
@@ -31,12 +33,24 @@ public:
     }
 
     Osobnik(){}
+
+    void dodaj_miasto_koncowe(){
+        int miasto_startowe = this->droga.front();
+        this->droga.push_back(miasto_startowe);
+        this->dlugosc_drogi = oblicz_koszt_drogi(this->droga,global_macierz);
+    }
+
+    void aktualizuj_miasto_koncowe(){
+        int miasto_startowe = this->droga.front();
+        this->droga.back() = miasto_startowe;
+        this->dlugosc_drogi = oblicz_koszt_drogi(this->droga,global_macierz);
+    }
 };
 
 vector<Osobnik> populacja;
 
 Osobnik najlepszy_osobnik = Osobnik(vector<int>(),INFINITY);
-int najlepsza_dlugosc = INFINITY;
+
 
 
 
@@ -59,9 +73,9 @@ void odliczanie(int sekundy) {
     auto koniec = start + chrono::seconds(sekundy);
 
     while (chrono::high_resolution_clock::now() < koniec) {
-        cout << "\rPozostały czas: " << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count() << " sekund";
+        //cout << "\rPozostały czas: " << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count() << " sekund";
         //cout.clear();
-        this_thread::sleep_for(chrono::milliseconds(10));
+        //this_thread::sleep_for(chrono::milliseconds(10));
     }
 
     cout << "\rPozostały czas: 0 sekund  " << endl;
@@ -85,11 +99,16 @@ void generuj_startowa_populacja() {
         Osobnik osobnik = Osobnik(pula_miast, oblicz_koszt_drogi(pula_miast,global_macierz));
         populacja.push_back(osobnik);
     }
+
+    // dodaje brakujące miasto końcowe do każdego osobnika
+    for (Osobnik& osobnik: populacja) {
+        osobnik.dodaj_miasto_koncowe();
+    }
 }
 
 int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> macierz2) {
     int suma = 0;
-    for (int i = 0; i < global_liczba_miast - 1; ++i) {
+    for (int i = 0; i < global_liczba_miast-1; ++i) {
         suma += macierz2[rozwionzanie[i]][rozwionzanie[i + 1]];
     }
     return suma;
@@ -97,7 +116,9 @@ int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> maci
 
 void ocena_populacji(){
     int dlugosc_drogi;
-    for (const Osobnik& elem : populacja){
+    for (Osobnik& elem : populacja){
+
+        elem.aktualizuj_miasto_koncowe();
 
         // obliczenie kosztu drogi
         dlugosc_drogi = oblicz_koszt_drogi(elem.droga, global_macierz);
@@ -107,6 +128,7 @@ void ocena_populacji(){
 
             // aktualizacja najlepszego osobnika / rozwiązania dla przeżywalności
             najlepszy_osobnik = elem;
+            cout<<"Nowy najlepszy: "<<elem.dlugosc_drogi<<endl;
         }
     }
 }
@@ -134,7 +156,7 @@ vector<Osobnik> wybranie_rodzicow(){
 
     // todo czy wybranie osobnika kilka razy jest poprawne ?
     // Wybieranie rodziców
-    for (int i = 0; i < int(populacja.size()/5); i++) {
+    for (int i = 0; i < int(populacja.size()); i++) {
         int suma = 0;
         int los = distribution(gen);
 
@@ -150,7 +172,7 @@ vector<Osobnik> wybranie_rodzicow(){
     return wybrani;
 }
 
-Osobnik krzyzowanie_OX(const Osobnik& rodzic1, const Osobnik& rodzic2){
+Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     Osobnik potomek;
     int rozmiar_drogi = int(populacja[0].droga.size());
 
@@ -163,7 +185,7 @@ Osobnik krzyzowanie_OX(const Osobnik& rodzic1, const Osobnik& rodzic2){
         swap(punkt1, punkt2);
     }
 
-    // wypełn inie potomka -1 (puste pole)
+    // wypełninie potomka -1 (puste pole)
     for (int i = 0; i < rozmiar_drogi; i++) {
         potomek.droga.push_back(-1);
     }
@@ -176,13 +198,34 @@ Osobnik krzyzowanie_OX(const Osobnik& rodzic1, const Osobnik& rodzic2){
 
     // Wypełnienie potomka miastami z rodzica 2 w kolejności
     for (int i = 0; i < rozmiar_drogi; i++) {
-        if(potomek.droga[i] != -1){
+        if(potomek.droga[i] == -1){
             potomek.droga[i] = rodzic2.droga[i];
         }
     }
 
 
     return potomek;
+}
+
+// todo krzyzowanie psuje droge
+void krzyzowanie(){
+    Osobnik potomek;
+
+    for (Osobnik& osobnik: populacja) {
+        osobnik.aktualizuj_miasto_koncowe();
+    }
+
+    uniform_int_distribution<> distribution(0, int(populacja.size()) - 1);
+    uniform_real_distribution<float> szansa_krzyzowania(0.0f, 1.0f);
+
+    for (Osobnik& osobnik: populacja){
+        float szansa = szansa_krzyzowania(gen);
+        if(szansa < wsp_krzyzowania){
+            int rodzic1 = distribution(gen);
+            int rodzic2 = distribution(gen);
+            osobnik = krzyzowanie_OX(populacja[rodzic1], populacja[rodzic2]);
+        }
+    }
 }
 
 vector<int> genetyczny(int czas){
@@ -200,13 +243,15 @@ vector<int> genetyczny(int czas){
     thread thread_warunek_stopu(odliczanie,czas);
 
     // ocena populacji startowej
-    ocena_populacji();
+    ocena_populacji();                // etap 2 tylko raz na początku
 
-    while(chrono::high_resolution_clock::now() < stop){
+    while(chrono::high_resolution_clock::now() < stop){  // etap 3
 
-        ocena_populacji();
+        ocena_populacji();       // etap 2 każdy kolejny
 
-        populacja = wybranie_rodzicow();
+        populacja = wybranie_rodzicow();     // etap 4
+
+        //krzyzowanie();  // etap 5
     }
 
     // wypisanie najlepszego
