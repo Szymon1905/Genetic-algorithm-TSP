@@ -209,23 +209,28 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         potomek.droga[i] = rodzic1.droga[i];
     }
 
+
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
     vector<int> dostepne_miasta;
     for (int i = punkt2+1; i < rozmiar_drogi; i++) {
-        if(not czy_zawiera(potomek.droga, rodzic2.droga[i]) and not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
+        if(not czy_zawiera(potomek.droga, rodzic2.droga[i])){
+            if(not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
 
-            // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
-            dostepne_miasta.push_back(rodzic2.droga[i]);
+                // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+                dostepne_miasta.push_back(rodzic2.droga[i]);
+            }
         }
     }
     // todo dodac check aby sprawdzal czy nie dodaje dupliktu miasta startowego
 
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 z lewej storny
-    for (int i = 0; i < punkt1; i++) {
-        if(not czy_zawiera(potomek.droga, rodzic2.droga[i]) and not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
+    for (int i = 0; i <= punkt2; i++) {
+        if(not czy_zawiera(potomek.droga, rodzic2.droga[i])){
+            if(not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
 
-            // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
-            dostepne_miasta.push_back(rodzic2.droga[i]);
+                // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+                dostepne_miasta.push_back(rodzic2.droga[i]);
+            }
         }
     }
 
@@ -233,12 +238,8 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     for (int i = punkt2+1; i < rozmiar_drogi; i++) {
         if(potomek.droga[i] == -1){
 
-            if(i == rozmiar_drogi-1){
-                potomek.droga.back() = potomek.droga[0];
-                continue;
-            }
-
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
+            //todo wykrzaza sie na punktach 0 i 4 i tylko tam
             potomek.droga[i] = dostepne_miasta.front();
             dostepne_miasta.erase(dostepne_miasta.begin());
         }
@@ -246,12 +247,15 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
 
     // Wypełnienie potomka miastami z rodzica 2 częsci lewej
     for (int i = 0; i < punkt1; i++) {
-        if(potomek.droga[i] == -1 and not czy_zawiera(potomek.droga,rodzic2.droga[i])){
 
-            if(i == 0){
-                potomek.droga[0] = potomek.droga.back();
-                continue;
-            }
+        if(i == 0){
+            potomek.droga[0] = potomek.droga.back();
+            continue;
+        }
+
+
+        //  and not czy_zawiera(potomek.droga,rodzic2.droga[i])
+        if(potomek.droga[i] == -1){
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
             potomek.droga[i] = dostepne_miasta.front();
@@ -261,6 +265,10 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
 
 
     if(czy_zawiera(potomek.droga,-1)){
+        for (int a:potomek.droga) {
+            cout<<a<<" ";
+        }
+        cout<<endl;
         cout<<"Zawiera -1"<<endl;
     }
 
