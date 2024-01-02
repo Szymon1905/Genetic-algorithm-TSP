@@ -19,7 +19,7 @@ int global_liczba_miast;
 vector<vector<int>> global_macierz;
 
 int czas=6;
-int startowa_wielkosc_populacji = 6;
+int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
 float wsp_krzyzowania = 0.8;
 int sposob_mutacji = 1;
@@ -73,7 +73,8 @@ int main() {
         cout << "3 - współczynnik mutacji" << endl;
         cout << "4 - współczynnik krzyżowania" << endl;
         cout << "5 - algorytm genetyczny" << endl;
-        cout << "6 - algorytm genetyczny TEST" << endl;
+        cout << "6 - algorytm genetyczny TEST 5" << endl;
+        cout << "7 - algorytm genetyczny TEST 10" << endl;
         cin>>opcja;
 
         switch (opcja) {
@@ -117,6 +118,11 @@ int main() {
                 genetyczny(czas);
                 break;
             case 7:
+                cout<<"TEST "<<endl;
+                global_macierz = wczytaj_macierz("tsp_10.txt");
+                genetyczny(czas);
+                break;
+            case 8:
                 return 0;
         }
     }

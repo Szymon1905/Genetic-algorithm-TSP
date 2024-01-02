@@ -101,7 +101,7 @@ void generuj_startowa_populacja() {
     // generowanie metodą shuffle losowych permutacji miast oraz wkładanie ich do populacji
     for (int i = 0; i < startowa_wielkosc_populacji; i++) {
         shuffle(pula_miast.begin(), pula_miast.end(), gen);
-        Osobnik osobnik = Osobnik(pula_miast, oblicz_koszt_drogi(pula_miast,global_macierz));
+        Osobnik osobnik = Osobnik(pula_miast, INFINITY);
         populacja.push_back(osobnik);
     }
 
@@ -109,11 +109,16 @@ void generuj_startowa_populacja() {
     for (Osobnik& osobnik: populacja) {
         osobnik.dodaj_miasto_koncowe();
     }
+
+    for (Osobnik& osobnik: populacja) {
+        osobnik.dlugosc_drogi = oblicz_koszt_drogi(pula_miast,global_macierz);
+    }
+
 }
 
 int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> macierz2) {
     int suma = 0;
-    for (int i = 0; i < global_liczba_miast-1; ++i) {
+    for (int i = 0; i < rozwionzanie.size()-1; i++) {
         suma += macierz2[rozwionzanie[i]][rozwionzanie[i + 1]];
     }
     return suma;
@@ -133,6 +138,10 @@ void ocena_populacji(){
 
             // aktualizacja najlepszego osobnika / rozwiązania dla przeżywalności
             najlepszy_osobnik = elem;
+            for (int a : najlepszy_osobnik.droga) {
+                cout<<a<<" ";
+            }
+            cout<<endl;
             cout<<"Nowy najlepszy: "<<elem.dlugosc_drogi<<endl;
         }
     }
