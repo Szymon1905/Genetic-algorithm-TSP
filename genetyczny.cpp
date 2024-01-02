@@ -45,6 +45,11 @@ public:
         this->droga.back() = miasto_startowe;
         this->dlugosc_drogi = oblicz_koszt_drogi(this->droga,global_macierz);
     }
+
+    void reset(){
+        this->droga.clear();
+        this->dlugosc_drogi = INFINITY;
+    }
 };
 
 vector<Osobnik> populacja;
@@ -172,6 +177,15 @@ vector<Osobnik> wybranie_rodzicow(){
     return wybrani;
 }
 
+bool czy_zawiera(vector<int> wektor, int liczba){
+    for (int pole: wektor) {
+        if (pole == liczba){
+            return true;
+        }
+    }
+    return false;
+}
+
 Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     Osobnik potomek;
     int rozmiar_drogi = int(populacja[0].droga.size());
@@ -190,18 +204,66 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         potomek.droga.push_back(-1);
     }
 
-    // wstawienie miast do potomka od rodzica pomiędzy punktami cięcia
+    // wstawienie miast do potomka od rodzica pomiędzy punktami cięcia,  takie zielone na slajdzie 17
     for (int i = punkt1; i <= punkt2; i++) {
         potomek.droga[i] = rodzic1.droga[i];
     }
 
+    //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
+    vector<int> dostepne_miasta;
+    for (int i = punkt2+1; i < rozmiar_drogi; i++) {
+        if(not czy_zawiera(potomek.droga, rodzic2.droga[i]) and not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
 
-    // Wypełnienie potomka miastami z rodzica 2 w kolejności
-    for (int i = 0; i < rozmiar_drogi; i++) {
-        if(potomek.droga[i] == -1){
-            potomek.droga[i] = rodzic2.droga[i];
+            // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+            dostepne_miasta.push_back(rodzic2.droga[i]);
         }
     }
+    // todo dodac check aby sprawdzal czy nie dodaje dupliktu miasta startowego
+
+    //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 z lewej storny
+    for (int i = 0; i < punkt1; i++) {
+        if(not czy_zawiera(potomek.droga, rodzic2.droga[i]) and not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
+
+            // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+            dostepne_miasta.push_back(rodzic2.droga[i]);
+        }
+    }
+
+    // Wypełnienie potomka miastami z rodzica 2 częsci prawej
+    for (int i = punkt2+1; i < rozmiar_drogi; i++) {
+        if(potomek.droga[i] == -1){
+
+            if(i == rozmiar_drogi-1){
+                potomek.droga.back() = potomek.droga[0];
+                continue;
+            }
+
+            // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
+            potomek.droga[i] = dostepne_miasta.front();
+            dostepne_miasta.erase(dostepne_miasta.begin());
+        }
+    }
+
+    // Wypełnienie potomka miastami z rodzica 2 częsci lewej
+    for (int i = 0; i < punkt1; i++) {
+        if(potomek.droga[i] == -1 and not czy_zawiera(potomek.droga,rodzic2.droga[i])){
+
+            if(i == 0){
+                potomek.droga[0] = potomek.droga.back();
+                continue;
+            }
+
+            // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
+            potomek.droga[i] = dostepne_miasta.front();
+            dostepne_miasta.erase(dostepne_miasta.begin());
+        }
+    }
+
+
+    if(czy_zawiera(potomek.droga,-1)){
+        cout<<"Zawiera -1"<<endl;
+    }
+
 
 
     return potomek;
@@ -235,6 +297,9 @@ vector<int> genetyczny(int czas){
     generuj_startowa_populacja();
 
 
+    //reset najlepszego osobnika
+    najlepszy_osobnik.reset();
+
     // obliczanie czasu dla wątku który odpowiada za warunek stopu
     auto start = chrono::high_resolution_clock ::now();
     auto stop = start + chrono::seconds (czas);
@@ -251,7 +316,7 @@ vector<int> genetyczny(int czas){
 
         populacja = wybranie_rodzicow();     // etap 4
 
-        //krzyzowanie();  // etap 5
+        krzyzowanie();  // etap 5
     }
 
     // wypisanie najlepszego

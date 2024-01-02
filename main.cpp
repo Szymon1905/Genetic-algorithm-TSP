@@ -108,7 +108,7 @@ int main() {
 
                 break;
             case 5:
-                cout<<"Start alogrytmu"<<endl;
+                cout<<"Start algorytmu"<<endl;
                 genetyczny(czas);
                 break;
             case 6:
