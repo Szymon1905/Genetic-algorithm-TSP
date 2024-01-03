@@ -10,6 +10,7 @@
 
 #include <thread>
 #include <random>
+#include <unordered_set>
 
 extern int global_liczba_miast;
 extern int startowa_wielkosc_populacji;
@@ -195,6 +196,33 @@ bool czy_zawiera(vector<int> wektor, int liczba){
     return false;
 }
 
+//todo usunąć te metode
+bool czy_sa_duplikaty(const std::vector<int>& vec) {
+    std::vector<int> vec_copy = vec;  // Kopiujemy wektor, aby nie modyfikować oryginału
+    vec_copy.pop_back();  // Pomijamy ostatni element
+
+    std::unordered_set<int> seen_elements;
+
+    for (int element : vec_copy) {
+        // Sprawdź, czy element już wystąpił
+        if (seen_elements.find(element) != seen_elements.end()) {
+            return true;  // Element się powtarza, zwracamy true
+        }
+
+        // Dodaj element do zbioru już widzianych
+        seen_elements.insert(element);
+    }
+
+    return false;  // Brak duplikatów, zwracamy false
+}
+
+bool check_dup(vector<int> vec){
+    if (vec[4] == vec[5]){
+        return true;
+    }
+    return false;
+}
+
 Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     Osobnik potomek;
     int rozmiar_drogi = int(populacja[0].droga.size());
@@ -217,6 +245,8 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     for (int i = punkt1; i <= punkt2; i++) {
         potomek.droga[i] = rodzic1.droga[i];
     }
+
+
 
 
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
@@ -243,9 +273,20 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         }
     }
 
+    // fix na sytuacje 0-4 dla 5, 0-9 dla 10
+    if(punkt1 == 0 and punkt2 == rozmiar_drogi-2){
+        potomek.droga.back() = potomek.droga.front();
+    }
+
+
     // Wypełnienie potomka miastami z rodzica 2 częsci prawej
     for (int i = punkt2+1; i < rozmiar_drogi; i++) {
         if(potomek.droga[i] == -1){
+
+            if(punkt1 == 0 and i == rozmiar_drogi-1){
+                potomek.droga[i] = potomek.droga.front();
+                continue;
+            }
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
             //todo wykrzaza sie na punktach 0 i 4 i tylko tam
@@ -253,6 +294,8 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
             dostepne_miasta.erase(dostepne_miasta.begin());
         }
     }
+
+
 
     // Wypełnienie potomka miastami z rodzica 2 częsci lewej
     for (int i = 0; i < punkt1; i++) {
@@ -272,6 +315,11 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         }
     }
 
+    //todo delte
+    if(check_dup(potomek.droga)){
+        cout<<"";
+    }
+
 
     if(czy_zawiera(potomek.droga,-1)){
         for (int a:potomek.droga) {
@@ -286,7 +334,7 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
     return potomek;
 }
 
-// todo krzyzowanie psuje droge
+// todo krzyzowanie psuje droge ?
 void krzyzowanie(){
     Osobnik potomek;
 
