@@ -1,0 +1,157 @@
+#include <iostream>
+#include <vector>
+#include <random>
+
+
+using namespace std;
+
+vector<int> rodzic1 = {0, 1, 2, 3, 4, 0};
+vector<int> rodzic2 = {0, 2, 4, 1, 3, 0};
+vector<int> potomek = {-1, -1, 2, 3, -1, -1};
+
+int punkt1 = 2;
+int punkt2 = 3;
+
+vector<int> bbbb = {4, 1, 3, 0, 2, 4};
+
+int oblicz_koszt_drogi(const vector<int> &rozwionzanie, vector<vector<int>> macierz2) {
+    int suma = 0;
+    for (int i = 0; i < bbbb.size() - 1; i++) {
+        suma += macierz2[rozwionzanie[i]][rozwionzanie[i + 1]];
+    }
+    return suma;
+}
+
+vector<vector<int>> macierz = {
+        {-1,  81, 50,  18, 75, 39, 107, 77, 87, 43},
+        {81,  -1, 76,  21, 37, 26, 34,  58, 66, 15},
+        {50,  76, -1,  24, 14, 58, 100, 68, 33, 30},
+        {18,  21, 24,  -1, 19, 58, 68,  62, 84, 81},
+        {75,  37, 14,  19, -1, 31, 60,  65, 29, 91},
+        {39,  26, 58,  58, 31, -1, 64,  21, 42, 46},
+        {107, 34, 100, 68, 60, 64, -1,  15, 55, 16},
+        {77,  58, 68,  62, 65, 21, 15,  -1, 17, 34},
+        {87,  66, 33,  84, 29, 42, 55,  17, -1, 68},
+        {43,  15, 30,  81, 91, 46, 16,  34, 68, -1}};
+
+
+vector<int> dostepne_miasta;
+
+bool czy_zawiera(vector<int> wektor, int liczba) {
+    for (int pole: wektor) {
+        if (pole == liczba) {
+            return true;
+        }
+    }
+    return false;
+}
+
+random_device rd;
+mt19937 gen(rd());
+
+void krzyzowanie_OX(vector<int> rodzic1, vector<int> rodzic2) {
+    vector<int> potomek;
+    int rozmiar_drogi = int(6);
+
+    std::uniform_int_distribution<> distribution(0, rozmiar_drogi - 1);
+    int punkt1 = 0;
+    int punkt2 = 2;
+
+    // Upewnienie się, że punkt1 < punkt2
+    if (punkt1 > punkt2) {
+        swap(punkt1, punkt2);
+    }
+
+    // wypełninie potomka -1 (puste pole)
+    for (int i = 0; i < rozmiar_drogi; i++) {
+        potomek.push_back(-1);
+    }
+
+    // wstawienie miast do potomka od rodzica pomiędzy punktami cięcia,  takie zielone na slajdzie 17
+    for (int i = punkt1; i <= punkt2; i++) {
+        potomek[i] = rodzic1[i];
+    }
+
+
+
+
+    //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
+    vector<int> dostepne_miasta;
+    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
+        if (not czy_zawiera(potomek, rodzic2[i])) {
+            if (not czy_zawiera(dostepne_miasta, rodzic2[i])) {
+
+                // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+                dostepne_miasta.push_back(rodzic2[i]);
+            }
+        }
+    }
+    // todo dodac check aby sprawdzal czy nie dodaje dupliktu miasta startowego
+
+    //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 z lewej storny
+    for (int i = 0; i <= punkt2; i++) {
+        if (not czy_zawiera(potomek, rodzic2[i])) {
+            if (not czy_zawiera(dostepne_miasta, rodzic2[i])) {
+
+                // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
+                dostepne_miasta.push_back(rodzic2[i]);
+            }
+        }
+    }
+
+    // fix na sytuacje 0-4 dla 5, 0-9 dla 10
+    if (punkt1 == 0 and punkt2 == rozmiar_drogi - 2) {
+        potomek.back() = potomek.front();
+    }
+
+    //todo źle
+    // Wypełnienie potomka miastami z rodzica 2 częsci prawej
+    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
+        if (potomek[i] == -1) {
+
+
+            if (punkt1 == 0 and i == rozmiar_drogi - 1) {
+                potomek[i] = potomek.front();
+                continue;
+            }
+
+            // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
+            //todo wykrzaza sie na punktach 0 i 4 i tylko tam
+            potomek[i] = dostepne_miasta.front();
+            dostepne_miasta.erase(dostepne_miasta.begin());
+        }
+    }
+
+
+    // Wypełnienie potomka miastami z rodzica 2 częsci lewej
+    for (int i = 0; i < punkt1; i++) {
+
+        if (i == 0) {
+            potomek[0] = potomek.back();
+            continue;
+        }
+
+
+        //  and not czy_zawiera(potomek.droga,rodzic2.droga[i])
+        if (potomek[i] == -1) {
+
+            // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
+            potomek[i] = dostepne_miasta.front();
+            dostepne_miasta.erase(dostepne_miasta.begin());
+        }
+    }
+
+
+}
+
+
+int main() {
+    //test2();
+    cout << oblicz_koszt_drogi(bbbb, macierz);
+
+    vector<int> rodzic11 = {1, 3, 2, 4, 0, 1};
+    vector<int> rodzic22 = {3, 2, 4, 1, 0, 3};
+
+    //krzyzowanie_OX(rodzic11,rodzic22);
+    return 0;
+}
