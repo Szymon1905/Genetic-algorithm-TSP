@@ -18,7 +18,7 @@ using namespace std;
 int global_liczba_miast;
 vector<vector<int>> global_macierz;
 
-int czas=6;
+int czas=30;
 int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
 float wsp_krzyzowania = 0.8;
@@ -109,6 +109,10 @@ int main() {
 
                 break;
             case 5:
+                if(global_macierz.empty()){
+                    cout<<"pusta macierz"<<endl;
+                    break;
+                }
                 cout<<"Start algorytmu"<<endl;
                 genetyczny(czas);
                 break;

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<int> genetyczny(int);
+void  genetyczny(int);
 
 void ocena_populacji();
 

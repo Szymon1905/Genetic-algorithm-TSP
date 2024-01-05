@@ -18,7 +18,6 @@ extern float wsp_krzyzowania;
 extern vector<vector<int>> global_macierz;
 
 
-
 // inicjajca generatora liczb losowych
 random_device rd;
 mt19937 gen(rd());
@@ -28,26 +27,15 @@ public:
     vector<int> droga;
     int dlugosc_drogi;
 
-    Osobnik(vector<int> trasa, int dlugosc_trasy){
+    Osobnik(vector<int> trasa, int dlugosc_trasy) {
         this->droga = trasa;
         this->dlugosc_drogi = dlugosc_trasy;
     }
 
-    Osobnik(){}
+    Osobnik() {}
 
-    void dodaj_miasto_koncowe(){
-        int miasto_startowe = this->droga.front();
-        this->droga.push_back(miasto_startowe);
-        this->dlugosc_drogi = oblicz_koszt_drogi(this->droga,global_macierz);
-    }
 
-    void aktualizuj_miasto_koncowe(){
-        int miasto_startowe = this->droga.front();
-        this->droga.back() = miasto_startowe;
-        this->dlugosc_drogi = oblicz_koszt_drogi(this->droga,global_macierz);
-    }
-
-    void reset(){
+    void reset() {
         this->droga.clear();
         this->dlugosc_drogi = INFINITY;
     }
@@ -55,36 +43,43 @@ public:
 
 vector<Osobnik> populacja;
 
-Osobnik najlepszy_osobnik = Osobnik(vector<int>(),INFINITY);
+Osobnik najlepszy_osobnik = Osobnik(vector<int>(), INFINITY);
 
 
-
-
-
-void wypisz_najlepsze(){
-    cout<<endl;
-    cout<<endl;
+void wypisz_najlepsze() {
+    cout << endl;
+    cout << endl;
     cout << "Finalna Droga: ";
     for (int elem: najlepszy_osobnik.droga) {
         cout << elem << " ";
     }
+    cout << najlepszy_osobnik.droga.front() << endl;
     cout << endl;
     cout << "Finalny Koszt: " << najlepszy_osobnik.dlugosc_drogi;
-    cout<<endl;
-    cout<<endl;
+    cout << endl;
+    cout << endl;
 }
 
 void odliczanie(int sekundy) {
     auto start = chrono::high_resolution_clock::now();
     auto koniec = start + chrono::seconds(sekundy);
 
-    while (chrono::high_resolution_clock::now() < koniec) {
-        //cout << "\rPozostały czas: " << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count() << " sekund";
-        //cout.clear();
-        //this_thread::sleep_for(chrono::milliseconds(10));
-    }
 
-    cout << "\rPozostały czas: 0 sekund  " << endl;
+    while (chrono::high_resolution_clock::now() < koniec) {
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+        /*
+           cout << "\rPozostały czas: "
+                << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count()
+                << " sekund";
+           cout.clear();
+
+
+
+       cout << "\rPozostały czas: 0 sekund  " << endl;
+
+       }
+        */
     cout << "Koniec czasu" << endl;
 }
 
@@ -106,53 +101,52 @@ void generuj_startowa_populacja() {
         populacja.push_back(osobnik);
     }
 
-    // dodaje brakujące miasto końcowe do każdego osobnika
-    for (Osobnik& osobnik: populacja) {
-        osobnik.dodaj_miasto_koncowe();
-    }
-
-    for (Osobnik& osobnik: populacja) {
-        osobnik.dlugosc_drogi = oblicz_koszt_drogi(pula_miast,global_macierz);
+    for (Osobnik &osobnik: populacja) {
+        osobnik.dlugosc_drogi = oblicz_koszt_drogi(pula_miast, global_macierz);
     }
 
 }
 
-int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> macierz2) {
+int oblicz_koszt_drogi(const vector<int> &rozwionzanie, vector<vector<int>> macierz2) {
     int suma = 0;
-    for (int i = 0; i < rozwionzanie.size()-1; i++) {
+    for (int i = 0; i < rozwionzanie.size() - 1; i++) {
         suma += macierz2[rozwionzanie[i]][rozwionzanie[i + 1]];
     }
+
+    // plus powrot do miasta poczatkowego
+    suma += macierz2[rozwionzanie.back()][rozwionzanie.front()];
     return suma;
 }
 
-void ocena_populacji(){
-    int dlugosc_drogi;
-    for (Osobnik& elem : populacja){
+void ocena_populacji() {
 
-        elem.aktualizuj_miasto_koncowe();
+    for (Osobnik &elem: populacja) {
+
 
         // obliczenie kosztu drogi
-        dlugosc_drogi = oblicz_koszt_drogi(elem.droga, global_macierz);
+        elem.dlugosc_drogi = oblicz_koszt_drogi(elem.droga, global_macierz);
 
         // ocena rozwiązania
-        if ( dlugosc_drogi < najlepszy_osobnik.dlugosc_drogi ){
+        if (elem.dlugosc_drogi < najlepszy_osobnik.dlugosc_drogi) {
 
             // aktualizacja najlepszego osobnika / rozwiązania dla przeżywalności
             najlepszy_osobnik = elem;
-            for (int a : najlepszy_osobnik.droga) {
-                cout<<a<<" ";
+            for (int a: najlepszy_osobnik.droga) {
+                cout << a << " ";
             }
-            cout<<endl;
-            cout<<"Nowy najlepszy: "<<elem.dlugosc_drogi<<endl;
+            cout << najlepszy_osobnik.droga[0] << endl;
+
+            cout << endl;
+            cout << "Nowy najlepszy: " << elem.dlugosc_drogi << endl;
         }
     }
 }
 
-vector<Osobnik> wybranie_rodzicow(){
+vector<Osobnik> wybranie_rodzicow() {
 
     // Obliczenie sumy wartości funkcji celu (czyli drogi) dla wszystkich osobników
     int suma_drog = 0;
-    for (Osobnik& osobnik : populacja) {
+    for (Osobnik &osobnik: populacja) {
         suma_drog = suma_drog + osobnik.dlugosc_drogi;
     }
 
@@ -164,20 +158,22 @@ vector<Osobnik> wybranie_rodzicow(){
 
 
     //sprawdzenie czy populacja nie jest pusta
-    if (populacja.empty()){
+    if (populacja.empty()) {
         return wybrani;
     }
 
 
     // todo czy wybranie osobnika kilka razy jest poprawne ?
+    //todo wybranie populacji pobiera wszystkich a nie najlpeszych, poprawka potrzebna
+
     // Wybieranie rodziców
     for (int i = 0; i < int(populacja.size()); i++) {
         int suma = 0;
         int los = distribution(gen);
 
-        for (Osobnik& osobnik : populacja) {
+        for (Osobnik &osobnik: populacja) {
             suma += osobnik.dlugosc_drogi;
-            if (suma >= los){
+            if (suma >= los) {
                 wybrani.push_back(osobnik);
                 break;
             }
@@ -187,47 +183,22 @@ vector<Osobnik> wybranie_rodzicow(){
     return wybrani;
 }
 
-bool czy_zawiera(vector<int> wektor, int liczba){
+
+
+bool czy_zawiera(vector<int> wektor, int liczba) {
     for (int pole: wektor) {
-        if (pole == liczba){
+        if (pole == liczba) {
             return true;
         }
     }
     return false;
 }
 
-//todo usunąć te metode
-bool czy_sa_duplikaty(const std::vector<int>& vec) {
-    std::vector<int> vec_copy = vec;  // Kopiujemy wektor, aby nie modyfikować oryginału
-    vec_copy.pop_back();  // Pomijamy ostatni element
-
-    std::unordered_set<int> seen_elements;
-
-    for (int element : vec_copy) {
-        // Sprawdź, czy element już wystąpił
-        if (seen_elements.find(element) != seen_elements.end()) {
-            return true;  // Element się powtarza, zwracamy true
-        }
-
-        // Dodaj element do zbioru już widzianych
-        seen_elements.insert(element);
-    }
-
-    return false;  // Brak duplikatów, zwracamy false
-}
-
-bool check_dup(vector<int> vec){
-    if (vec[4] == vec[5]){
-        return true;
-    }
-    return false;
-}
-
-Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
+Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2) {
     Osobnik potomek;
     int rozmiar_drogi = int(populacja[0].droga.size());
 
-    std::uniform_int_distribution<> distribution(0, rozmiar_drogi - 1);
+    std::uniform_int_distribution<> distribution(0, rozmiar_drogi - 2);
     int punkt1 = distribution(gen);
     int punkt2 = distribution(gen);
 
@@ -246,68 +217,45 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         potomek.droga[i] = rodzic1.droga[i];
     }
 
-
-
-
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
     vector<int> dostepne_miasta;
-    for (int i = punkt2+1; i < rozmiar_drogi; i++) {
-        if(not czy_zawiera(potomek.droga, rodzic2.droga[i])){
-            if(not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
+    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
+        if (not czy_zawiera(potomek.droga, rodzic2.droga[i])) {
+            if (not czy_zawiera(dostepne_miasta, rodzic2.droga[i])) {
 
                 // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
                 dostepne_miasta.push_back(rodzic2.droga[i]);
             }
         }
     }
-    // todo dodac check aby sprawdzal czy nie dodaje dupliktu miasta startowego
 
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 z lewej storny
     for (int i = 0; i <= punkt2; i++) {
-        if(not czy_zawiera(potomek.droga, rodzic2.droga[i])){
-            if(not czy_zawiera(dostepne_miasta, rodzic2.droga[i])){
+        if (not czy_zawiera(potomek.droga, rodzic2.droga[i])) {
+            if (not czy_zawiera(dostepne_miasta, rodzic2.droga[i])) {
 
                 // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
                 dostepne_miasta.push_back(rodzic2.droga[i]);
             }
         }
-    }
-
-    // fix na sytuacje 0-4 dla 5, 0-9 dla 10
-    if(punkt1 == 0 and punkt2 == rozmiar_drogi-2){
-        potomek.droga.back() = potomek.droga.front();
     }
 
 
     // Wypełnienie potomka miastami z rodzica 2 częsci prawej
-    for (int i = punkt2+1; i < rozmiar_drogi; i++) {
-        if(potomek.droga[i] == -1){
-
-            if(punkt1 == 0 and i == rozmiar_drogi-1){
-                potomek.droga[i] = potomek.droga.front();
-                continue;
-            }
+    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
+        if (potomek.droga[i] == -1) {
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
-            //todo wykrzaza sie na punktach 0 i 4 i tylko tam
             potomek.droga[i] = dostepne_miasta.front();
             dostepne_miasta.erase(dostepne_miasta.begin());
         }
     }
-
-
 
     // Wypełnienie potomka miastami z rodzica 2 częsci lewej
     for (int i = 0; i < punkt1; i++) {
 
-        if(i == 0){
-            potomek.droga[0] = potomek.droga.back();
-            continue;
-        }
 
-
-        //  and not czy_zawiera(potomek.droga,rodzic2.droga[i])
-        if(potomek.droga[i] == -1){
+        if (potomek.droga[i] == -1) {
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
             potomek.droga[i] = dostepne_miasta.front();
@@ -315,39 +263,19 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2){
         }
     }
 
-    //todo delte
-    if(check_dup(potomek.droga)){
-        cout<<"";
-    }
-
-
-    if(czy_zawiera(potomek.droga,-1)){
-        for (int a:potomek.droga) {
-            cout<<a<<" ";
-        }
-        cout<<endl;
-        cout<<"Zawiera -1"<<endl;
-    }
-
-
-
     return potomek;
 }
 
-// todo krzyzowanie psuje droge ?
-void krzyzowanie(){
-    Osobnik potomek;
 
-    for (Osobnik& osobnik: populacja) {
-        osobnik.aktualizuj_miasto_koncowe();
-    }
+void krzyzowanie() {
+    Osobnik potomek;
 
     uniform_int_distribution<> distribution(0, int(populacja.size()) - 1);
     uniform_real_distribution<float> szansa_krzyzowania(0.0f, 1.0f);
 
-    for (Osobnik& osobnik: populacja){
+    for (Osobnik &osobnik: populacja) {
         float szansa = szansa_krzyzowania(gen);
-        if(szansa < wsp_krzyzowania){
+        if (szansa < wsp_krzyzowania) {
             int rodzic1 = distribution(gen);
             int rodzic2 = distribution(gen);
             osobnik = krzyzowanie_OX(populacja[rodzic1], populacja[rodzic2]);
@@ -355,7 +283,7 @@ void krzyzowanie(){
     }
 }
 
-vector<int> genetyczny(int czas){
+void genetyczny(int czas) {
     vector<int> a;
 
     // generacja populacji startowej
@@ -366,28 +294,29 @@ vector<int> genetyczny(int czas){
     najlepszy_osobnik.reset();
 
     // obliczanie czasu dla wątku który odpowiada za warunek stopu
-    auto start = chrono::high_resolution_clock ::now();
-    auto stop = start + chrono::seconds (czas);
+    auto start = chrono::high_resolution_clock::now();
+    auto stop = start + chrono::seconds(czas);
 
     // start wątku odliczajacego czas do zatrzymania alogrytmu ( warunek stopu )
-    thread thread_warunek_stopu(odliczanie,czas);
+    thread thread_warunek_stopu(odliczanie, czas);
 
     // ocena populacji startowej
     ocena_populacji();                // etap 2 tylko raz na początku
 
-    while(chrono::high_resolution_clock::now() < stop){  // etap 3
+    while (chrono::high_resolution_clock::now() < stop) {  // etap 3
 
         ocena_populacji();       // etap 2 każdy kolejny
 
         populacja = wybranie_rodzicow();     // etap 4
 
         krzyzowanie();  // etap 5
+
+
     }
 
     // wypisanie najlepszego
     wypisz_najlepsze();
 
     // czeka aż wątek się skończy
-    thread_warunek_stopu.join();
-    return a;
+    // thread_warunek_stopu.join();
 }
