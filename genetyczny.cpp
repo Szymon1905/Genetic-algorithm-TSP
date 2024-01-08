@@ -275,6 +275,7 @@ void krzyzowanie() {
 
     for (Osobnik &osobnik: populacja) {
         float szansa = szansa_krzyzowania(gen);
+        // todo krzyzować taki procent polualcji a nie szansa na krzyzowanie
         if (szansa < wsp_krzyzowania) {
             int rodzic1 = distribution(gen);
             int rodzic2 = distribution(gen);
@@ -307,6 +308,7 @@ void genetyczny(int czas) {
 
         ocena_populacji();       // etap 2 każdy kolejny
 
+        // todo sprawdzic czy wybranie rodzicow jest ok
         populacja = wybranie_rodzicow();     // etap 4
 
         krzyzowanie();  // etap 5
@@ -314,9 +316,11 @@ void genetyczny(int czas) {
 
     }
 
+    // czeka aż wątek się skończy
+    thread_warunek_stopu.join();
+
     // wypisanie najlepszego
     wypisz_najlepsze();
 
-    // czeka aż wątek się skończy
-    // thread_warunek_stopu.join();
+
 }

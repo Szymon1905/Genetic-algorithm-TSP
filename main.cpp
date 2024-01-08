@@ -18,7 +18,7 @@ using namespace std;
 int global_liczba_miast;
 vector<vector<int>> global_macierz;
 
-int czas=30;
+int czas=10;
 int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
 float wsp_krzyzowania = 0.8;
@@ -36,7 +36,7 @@ vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
         cout << "Otwarto plik " << daneWejsciowe << endl;
     } else {
         cout << "Nie udało się otworzyć pliku wejściowego" << endl;
-        exit(-1);
+        return {};
     }
     int liczba_miast;
     plikWejsciowy >> liczba_miast; // wczytanie liczby miast
@@ -87,6 +87,7 @@ int main() {
                 cout<<"Podaj nazwę pliku: "<<endl;
                 cin>>nazwa;
                 global_macierz = wczytaj_macierz(nazwa);
+                system("CLS");
                 break;
             case 1:
                 cout<<"Podaj kryterium stopu w sekundach: "<<endl;
@@ -96,12 +97,12 @@ int main() {
             case 2:
                 cout<<"Podaj wielkość populacji startowej[500]: "<<endl;
                 cin>>startowa_wielkosc_populacji;
-
+                system("CLS");
                 break;
             case 3:
                 cout<<"Podaj wartość współczynnika mutacji[0.01]: "<<endl;
                 cin >> wsp_mutacji;
-
+                system("CLS");
                 break;
             case 4:
                 cout<<"Podaj wartość współczynnika krzyżowania[0.8]: "<<endl;
