@@ -114,43 +114,38 @@ void ocena_populacji() {
                 cout << a << " ";
             }
             cout << najlepszy_osobnik.droga[0] << endl;
-
-            cout << endl;
             cout << "Nowy najlepszy: " << elem.dlugosc_drogi << endl;
+            cout << endl;
         }
     }
 }
 
 vector<Osobnik> wybranie_rodzicow() {
-
     // Obliczenie sumy wartości funkcji celu (czyli drogi) dla wszystkich osobników
     int suma_drog = 0;
-    for (Osobnik &osobnik: populacja) {
-        suma_drog = suma_drog + osobnik.dlugosc_drogi;
+    for (const Osobnik &osobnik : populacja) {
+        suma_drog += osobnik.dlugosc_drogi;
     }
 
     // Inicjalizacja pustej listy wybranych rodziców
     vector<Osobnik> wybrani;
 
-
-    uniform_int_distribution<> distribution(0, suma_drog);
-
-
-    //sprawdzenie czy populacja nie jest pusta
+    // Sprawdzenie czy populacja nie jest pusta
     if (populacja.empty()) {
         return wybrani;
     }
 
-
-    // todo czy wybranie osobnika kilka razy jest poprawne ?
-    //todo wybranie populacji pobiera wszystkich a nie najlpeszych, poprawka potrzebna
+    // Sortowanie populacji w kolejności rosnącej
+    sort(populacja.begin(), populacja.end(), [](const Osobnik &a, const Osobnik &b) {
+        return a.dlugosc_drogi < b.dlugosc_drogi;
+    });
 
     // Wybieranie rodziców
-    for (int i = 0; i < int(populacja.size()); i++) {
+    for (int i = 0; i < int(populacja.size()) / 2; i++) {
         int suma = 0;
-        int los = distribution(gen);
+        int los = rand() % suma_drog;
 
-        for (Osobnik &osobnik: populacja) {
+        for (const Osobnik &osobnik : populacja) {
             suma += osobnik.dlugosc_drogi;
             if (suma >= los) {
                 wybrani.push_back(osobnik);
@@ -246,20 +241,42 @@ Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2) {
 
 
 void krzyzowanie() {
-    Osobnik potomek;
+    Osobnik potomek1, potomek2;
 
     uniform_int_distribution<> distribution(0, int(populacja.size()) - 1);
     uniform_real_distribution<float> szansa_krzyzowania(0.0f, 1.0f);
 
-    for (Osobnik &osobnik: populacja) {
+    vector<Osobnik> nowi;
+
+    for (Osobnik osobnik: populacja) {
         float szansa = szansa_krzyzowania(gen);
-        // todo krzyzować taki procent polualcji a nie szansa na krzyzowanie
+
         if (szansa < wsp_krzyzowania) {
             int rodzic1 = distribution(gen);
             int rodzic2 = distribution(gen);
-            osobnik = krzyzowanie_OX(populacja[rodzic1], populacja[rodzic2]);
+            potomek1 = krzyzowanie_OX(populacja[rodzic1], populacja[rodzic2]);
+            nowi.push_back(potomek1);
+        } else{
+            nowi.push_back(osobnik);
         }
+
     }
+
+    for (Osobnik osobnik: populacja) {
+        float szansa = szansa_krzyzowania(gen);
+
+        if (szansa < wsp_krzyzowania) {
+            int rodzic1 = distribution(gen);
+            int rodzic2 = distribution(gen);
+            potomek2 = krzyzowanie_OX(populacja[rodzic2], populacja[rodzic1]);
+            nowi.push_back(potomek2);
+        } else{
+            nowi.push_back(osobnik);
+        }
+
+    }
+
+    populacja = nowi;
 }
 
 void genetyczny(int czas) {
