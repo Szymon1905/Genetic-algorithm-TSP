@@ -8,7 +8,7 @@
 #include <chrono>
 #include <Windows.h>
 #include <thread>
-# include "genetyczny.h"
+#include "genetyczny.h"
 
 using namespace std;
 
@@ -22,9 +22,9 @@ int czas=10;
 int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
 float wsp_krzyzowania = 0.8;
-int sposob_mutacji = 1;
+int metoda_mutacji = 0;
 int sposob_krzyzowania = 1;
-
+string nazwa_wczytanej_macierzy = "";
 
 
 vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
@@ -34,6 +34,7 @@ vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
     plikWejsciowy.open(daneWejsciowe);    // otwieram plik
     if (plikWejsciowy.is_open()) {          // sprawdzam czy plik poprawnie otwarty
         cout << "Otwarto plik " << daneWejsciowe << endl;
+        nazwa_wczytanej_macierzy = daneWejsciowe;
     } else {
         cout << "Nie udało się otworzyć pliku wejściowego" << endl;
         return {};
@@ -66,15 +67,21 @@ int main() {
 
 
     while(true){
-        cout << "Opcje:  [] - wartość domyślna" << endl;
-        cout << "0 - wczytaj macierz" << endl;
-        cout << "1 - kryterium stopu [60]" << endl;
-        cout << "2 - populacja startowa" << endl;
-        cout << "3 - współczynnik mutacji" << endl;
-        cout << "4 - współczynnik krzyżowania" << endl;
-        cout << "5 - algorytm genetyczny" << endl;
-        cout << "6 - algorytm genetyczny TEST 5" << endl;
-        cout << "7 - algorytm genetyczny TEST 10" << endl;
+        cout << "Opcje:  [] <- obecna wartość parametru" << endl;
+        cout << "0 - wczytaj macierz["<<nazwa_wczytanej_macierzy<<"]" << endl;
+        cout << "1 - kryterium stopu[" << czas <<"]"<<endl;
+        cout << "2 - populacja startowa[" << startowa_wielkosc_populacji <<"]"<< endl;
+        cout << "3 - współczynnik mutacji[" << wsp_mutacji <<"]"<< endl;
+        if(metoda_mutacji == 0){
+            cout << "4 - typ mutacji[inwersja]"<< endl;
+        } else{
+            cout << "4 - typ mutacji[swapowanie]"<< endl;
+        }
+        cout << "5 - współczynnik krzyżowania[" << wsp_krzyzowania <<"]" << endl;
+        cout << "6 - typ krzyżowania" << endl;
+        cout << "7 - algorytm genetyczny" << endl;
+        cout << "8 - algorytm genetyczny TEST 5" << endl;
+        cout << "9 - algorytm genetyczny TEST 10" << endl;
         cin>>opcja;
 
         switch (opcja) {
@@ -92,24 +99,38 @@ int main() {
             case 1:
                 cout<<"Podaj kryterium stopu w sekundach: "<<endl;
                 cin>>czas;
-
                 break;
             case 2:
-                cout<<"Podaj wielkość populacji startowej[500]: "<<endl;
+                cout<<"Podaj wielkość populacji startowej: "<<endl;
                 cin>>startowa_wielkosc_populacji;
                 system("CLS");
                 break;
             case 3:
-                cout<<"Podaj wartość współczynnika mutacji[0.01]: "<<endl;
+                cout<<"Podaj wartość współczynnika mutacji: "<<endl;
                 cin >> wsp_mutacji;
                 system("CLS");
                 break;
             case 4:
-                cout<<"Podaj wartość współczynnika krzyżowania[0.8]: "<<endl;
-                cin >> wsp_krzyzowania;
-
+                cout<<"Podaj typ mutacji: "<<endl;
+                cout<<"0 - inwersja"<<endl;  //Mutacja przez inwersję (Inversion Mutation):
+                cout<<"1 - swapowanie"<<endl;  // Mutacja przez zamianę (Swap Mutation):
+                cin >> metoda_mutacji;
+                while(metoda_mutacji != 0 and metoda_mutacji != 1){
+                    cout<<"błędny parametr, podaj ponownie "<<endl;
+                    cin >> metoda_mutacji;
+                }
+                system("CLS");
                 break;
             case 5:
+                cout<<"Podaj wartość współczynnika krzyżowania: "<<endl;
+                cin >> wsp_krzyzowania;
+                break;
+            case 6:
+                cout<<"Wybierz krzyżowanie: "<<endl;
+                // todo dodać krzyżowanie nr 2
+                // cin >> wsp_krzyzowania;
+                break;
+            case 7:
                 if(global_macierz.empty()){
                     cout<<"pusta macierz"<<endl;
                     break;
@@ -117,17 +138,17 @@ int main() {
                 cout<<"Start algorytmu"<<endl;
                 genetyczny(czas);
                 break;
-            case 6:
+            case 8:
                 cout<<"TEST "<<endl;
                 global_macierz = wczytaj_macierz("tsp_5.txt");
                 genetyczny(czas);
                 break;
-            case 7:
+            case 9:
                 cout<<"TEST "<<endl;
                 global_macierz = wczytaj_macierz("tsp_10.txt");
                 genetyczny(czas);
                 break;
-            case 8:
+            case 10:
                 return 0;
         }
     }

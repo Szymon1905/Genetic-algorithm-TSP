@@ -1,45 +1,24 @@
 #include "genetyczny.h"
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
-#include <limits>
-#include <fstream>
 #include <chrono>
-
 #include <thread>
 #include <random>
 #include <unordered_set>
+#include "mutacje.h"
+
 
 extern int global_liczba_miast;
 extern int startowa_wielkosc_populacji;
 extern float wsp_krzyzowania;
+extern float wsp_mutacji;
 extern vector<vector<int>> global_macierz;
-
+extern float metoda_mutacji;
 
 // inicjajca generatora liczb losowych
 random_device rd;
 mt19937 gen(rd());
 
-class Osobnik {
-public:
-    vector<int> droga;
-    int dlugosc_drogi;
-
-    Osobnik(vector<int> trasa, int dlugosc_trasy) {
-        this->droga = trasa;
-        this->dlugosc_drogi = dlugosc_trasy;
-    }
-
-    Osobnik() {}
-
-
-    void reset() {
-        this->droga.clear();
-        this->dlugosc_drogi = INFINITY;
-    }
-};
 
 vector<Osobnik> populacja;
 
@@ -68,18 +47,18 @@ void odliczanie(int sekundy) {
     while (chrono::high_resolution_clock::now() < koniec) {
         this_thread::sleep_for(chrono::milliseconds(10));
     }
-        /*
-           cout << "\rPozostały czas: "
-                << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count()
-                << " sekund";
-           cout.clear();
+    /*
+       cout << "\rPozostały czas: "
+            << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count()
+            << " sekund";
+       cout.clear();
 
 
 
-       cout << "\rPozostały czas: 0 sekund  " << endl;
+   cout << "\rPozostały czas: 0 sekund  " << endl;
 
-       }
-        */
+   }
+    */
     cout << "Koniec czasu" << endl;
 }
 
@@ -182,7 +161,6 @@ vector<Osobnik> wybranie_rodzicow() {
 
     return wybrani;
 }
-
 
 
 bool czy_zawiera(vector<int> wektor, int liczba) {
@@ -313,6 +291,7 @@ void genetyczny(int czas) {
 
         krzyzowanie();  // etap 5
 
+        mutacja();
 
     }
 
