@@ -78,10 +78,9 @@ int main() {
             cout << "4 - typ mutacji[swapowanie]"<< endl;
         }
         cout << "5 - współczynnik krzyżowania[" << wsp_krzyzowania <<"]" << endl;
-        cout << "6 - typ krzyżowania" << endl;
-        cout << "7 - algorytm genetyczny" << endl;
-        cout << "8 - algorytm genetyczny TEST 5" << endl;
-        cout << "9 - algorytm genetyczny TEST 10" << endl;
+        cout << "6 - algorytm genetyczny" << endl;
+        cout << "7 - algorytm genetyczny TEST 10" << endl;
+        cout << "8 - algorytm genetyczny TEST 20" << endl;
         cin>>opcja;
 
         switch (opcja) {
@@ -126,11 +125,6 @@ int main() {
                 cin >> wsp_krzyzowania;
                 break;
             case 6:
-                cout<<"Wybierz krzyżowanie: "<<endl;
-                // todo dodać krzyżowanie nr 2
-                // cin >> wsp_krzyzowania;
-                break;
-            case 7:
                 if(global_macierz.empty()){
                     cout<<"pusta macierz"<<endl;
                     break;
@@ -138,17 +132,17 @@ int main() {
                 cout<<"Start algorytmu"<<endl;
                 genetyczny(czas);
                 break;
-            case 8:
-                cout<<"TEST "<<endl;
-                global_macierz = wczytaj_macierz("tsp_5.txt");
-                genetyczny(czas);
-                break;
-            case 9:
+            case 7:
                 cout<<"TEST "<<endl;
                 global_macierz = wczytaj_macierz("tsp_10.txt");
                 genetyczny(czas);
                 break;
-            case 10:
+            case 8:
+                cout<<"TEST "<<endl;
+                global_macierz = wczytaj_macierz("tsp_20.txt");
+                genetyczny(czas);
+                break;
+            case 9:
                 return 0;
         }
     }

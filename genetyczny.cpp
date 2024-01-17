@@ -283,7 +283,7 @@ void genetyczny(int czas) {
     vector<int> a;
 
     // generacja populacji startowej
-    generuj_startowa_populacja();
+    generuj_startowa_populacja(); // etap 1
 
 
     //reset najlepszego osobnika
@@ -303,12 +303,11 @@ void genetyczny(int czas) {
 
         ocena_populacji();       // etap 2 każdy kolejny
 
-        // todo sprawdzic czy wybranie rodzicow jest ok
         populacja = wybranie_rodzicow();     // etap 4
 
         krzyzowanie();  // etap 5
 
-        mutacja();
+        mutacja(); // etap 6
 
     }
 
@@ -316,7 +315,7 @@ void genetyczny(int czas) {
     thread_warunek_stopu.join();
 
     // wypisanie najlepszego
-    wypisz_najlepsze();
+    wypisz_najlepsze();   // etap 7
 
 
 }

@@ -37,10 +37,10 @@ void inwersja(Osobnik &osobnik) {
 
 void mutacja_inwersja() {
     auto rozmiar_populacji = populacja.size();
-    int numberOfMutations = static_cast<int>(wsp_mutacji * rozmiar_populacji);
+    int liczba_mutacji = static_cast<int>(wsp_mutacji * rozmiar_populacji);
 
     uniform_int_distribution<int> distribution(0, rozmiar_populacji - 1);
-    for (int i = 0; i < numberOfMutations; ++i) {
+    for (int i = 0; i < liczba_mutacji; i++) {
         int wylosowany = distribution(gen);
         inwersja(populacja[wylosowany]);
     }
