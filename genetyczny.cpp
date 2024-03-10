@@ -10,156 +10,188 @@
 
 extern int global_liczba_miast;
 extern int startowa_wielkosc_populacji;
-extern float wsp_krzyzowania;
+extern float crossover_factor;
 extern float wsp_mutacji;
 extern vector<vector<int>> global_macierz;
-extern float metoda_mutacji;
+extern float mutation_method;
+extern int roulette_ver;
 
-// inicjajca generatora liczb losowych
+// random number generator
 random_device rd;
 mt19937 gen(rd());
 
+auto start= chrono::high_resolution_clock::now();;
 
-vector<Osobnik> populacja;
+vector<Solution> population;
 
-Osobnik najlepszy_osobnik = Osobnik(vector<int>(), INFINITY);
+Solution best_solution = Solution(vector<int>(), INT32_MAX);
 
 
-void wypisz_najlepsze() {
+void print_best() {
     cout << endl;
     cout << endl;
-    cout << "Finalna Droga: ";
-    for (int elem: najlepszy_osobnik.droga) {
+    cout << "Best Solution: ";
+    for (int elem: best_solution.cities) {
         cout << elem << " ";
     }
-    cout << najlepszy_osobnik.droga.front() << endl;
+    cout << best_solution.cities.front() << endl;
     cout << endl;
-    cout << "Finalny Koszt: " << najlepszy_osobnik.dlugosc_drogi;
+    cout << "Cost of solution: " << best_solution.path_length;
     cout << endl;
     cout << endl;
 }
 
-void odliczanie(int sekundy) {
+void timer(int seconds) {
     auto start = chrono::high_resolution_clock::now();
-    auto koniec = start + chrono::seconds(sekundy);
+    auto end = start + chrono::seconds(seconds);
 
 
-    while (chrono::high_resolution_clock::now() < koniec) {
+    while (chrono::high_resolution_clock::now() < end) {
         this_thread::sleep_for(chrono::milliseconds(10));
     }
-    /*
-       cout << "\rPozostały czas: "
-            << chrono::duration_cast<chrono::seconds>(koniec - chrono::high_resolution_clock::now()).count()
-            << " sekund";
-       cout.clear();
 
+    cout << "\rRemaining time: "
+            << chrono::duration_cast<chrono::seconds>(end - chrono::high_resolution_clock::now()).count()
+            << " seconds";
+    cout.clear();
 
-
-   cout << "\rPozostały czas: 0 sekund  " << endl;
-
-   }
-    */
-    cout << "Koniec czasu" << endl;
+    cout << "Out of time" << endl;
 }
 
-void generuj_startowa_populacja() {
+void generate_starting_population() {
 
-    // generowanie puli miast do losowania
-    vector<int> pula_miast;
+    // generate cities / cities
+    vector<int> cities;
     for (int i = 0; i < global_liczba_miast; i++) {
-        pula_miast.push_back(i);
+        cities.push_back(i);
     }
 
-    // zerowanie populacji przy restarcie
-    populacja.clear();
+    // clear population on restart
+    population.clear();
 
-    // generowanie metodą shuffle losowych permutacji miast oraz wkładanie ich do populacji
+    // generating random permutations of cities by the shuffle method and inserting them into the starting population
     for (int i = 0; i < startowa_wielkosc_populacji; i++) {
-        shuffle(pula_miast.begin(), pula_miast.end(), gen);
-        Osobnik osobnik = Osobnik(pula_miast, INFINITY);
-        populacja.push_back(osobnik);
+        shuffle(cities.begin(), cities.end(), gen);
+        Solution solution = Solution(cities, INT32_MAX);
+        population.push_back(solution);
     }
 
-    for (Osobnik &osobnik: populacja) {
-        osobnik.dlugosc_drogi = oblicz_koszt_drogi(pula_miast, global_macierz);
+    for (Solution &solution: population) {
+        solution.path_length = calculate_path_length(cities, global_macierz);
     }
 
 }
 
-int oblicz_koszt_drogi(const vector<int> &rozwionzanie, vector<vector<int>> macierz2) {
-    int suma = 0;
-    for (int i = 0; i < rozwionzanie.size() - 1; i++) {
-        suma += macierz2[rozwionzanie[i]][rozwionzanie[i + 1]];
+int calculate_path_length(const vector<int> &solution, vector<vector<int>> matrix) {
+    int sum_path = 0;
+    for (int i = 0; i < solution.size() - 1; i++) {
+        sum_path += matrix[solution[i]][solution[i + 1]];
     }
 
-    // plus powrot do miasta poczatkowego
-    suma += macierz2[rozwionzanie.back()][rozwionzanie.front()];
-    return suma;
+    // add missing path to starting city
+    sum_path += matrix[solution.back()][solution.front()];
+    return sum_path;
 }
 
-void ocena_populacji() {
+void evaluate_population() {
 
-    for (Osobnik &elem: populacja) {
+    for (Solution &solution: population) {
 
 
-        // obliczenie kosztu drogi
-        elem.dlugosc_drogi = oblicz_koszt_drogi(elem.droga, global_macierz);
+        // calcaltion of path length
+        solution.path_length = calculate_path_length(solution.cities, global_macierz);
 
-        // ocena rozwiązania
-        if (elem.dlugosc_drogi < najlepszy_osobnik.dlugosc_drogi) {
+        // compare with current best solution
+        if (solution.path_length < best_solution.path_length) {
 
-            // aktualizacja najlepszego osobnika / rozwiązania dla przeżywalności
-            najlepszy_osobnik = elem;
-            for (int a: najlepszy_osobnik.droga) {
+            // update best solution for survivability of the best
+            best_solution = solution;
+
+            /*
+             for (int a: best_solution.cities) {
                 cout << a << " ";
             }
-            cout << najlepszy_osobnik.droga[0] << endl;
-            cout << "Nowy najlepszy: " << elem.dlugosc_drogi << endl;
-            cout << endl;
+             */
+            //auto t = chrono::high_resolution_clock::now();
+            //auto minelo_czasu = chrono::duration_cast<chrono::milliseconds>(t - start).count();
+            //cout << "Nowe najlepsze rozwiazanie znalezione po " << minelo_czasu << " milisekundach." << endl;
+            // cout << best_solution.cities[0] << endl;
+            cout << "New best: " << solution.path_length << endl;
         }
     }
 }
 
-vector<Osobnik> wybranie_rodzicow() {
-    // Obliczenie sumy wartości funkcji celu (czyli drogi) dla wszystkich osobników
-    int suma_drog = 0;
-    for (const Osobnik &osobnik : populacja) {
-        suma_drog += osobnik.dlugosc_drogi;
+vector<Solution> custom_parent_choosing_method() {
+    // Calculate the sum of the values of the objective function (i.e., path length) for all solutions
+    int path_sum = 0;
+    for (const Solution &solution : population) {
+        path_sum += solution.path_length;
     }
 
-    // Inicjalizacja pustej listy wybranych rodziców
-    vector<Osobnik> wybrani;
+    // Initialization of an empty list of selected parents
+    vector<Solution> chosen_ones;
 
-    // Sprawdzenie czy populacja nie jest pusta
-    if (populacja.empty()) {
-        return wybrani;
+    // Checking that the population is not empty
+    if (population.empty()) {
+        return chosen_ones;
     }
 
-    // Sortowanie populacji w kolejności rosnącej
-    sort(populacja.begin(), populacja.end(), [](const Osobnik &a, const Osobnik &b) {
-        return a.dlugosc_drogi < b.dlugosc_drogi;
+    sort(population.begin(), population.end(), [](const Solution &a, const Solution &b) {
+        return a.path_length < b.path_length;
     });
 
-    // Wybieranie rodziców
-    for (int i = 0; i < int(populacja.size()) / 2; i++) {
-        int suma = 0;
-        int los = rand() % suma_drog;
+    // Chooosing parents
+    for (int i = 0; i < int(population.size()) / 2; i++) {
+        int sum = 0;
+        int los = rand() % path_sum;
 
-        for (const Osobnik &osobnik : populacja) {
-            suma += osobnik.dlugosc_drogi;
-            if (suma >= los) {
-                wybrani.push_back(osobnik);
+        for (const Solution &solution : population) {
+            sum += solution.path_length;
+            if (sum >= los) {
+                chosen_ones.push_back(solution);
                 break;
             }
         }
     }
 
-    return wybrani;
+    return chosen_ones;
 }
 
 
-bool czy_zawiera(vector<int> wektor, int liczba) {
-    for (int pole: wektor) {
+vector<Solution> choosing_parent_book_method(){
+    // Calculate the sum of the values of the objective function (i.e., path) for all individuals
+    long double path_sum = 0.0;
+    for (const Solution &solution : population) {
+        path_sum += 1.0 / (long double)solution.path_length;
+    }
+
+    // Initialization of an empty list of selected parents
+    vector<Solution> chosen_ones;
+
+    uniform_real_distribution<long double> distribution(0.0, path_sum);
+
+    // Choosing parents
+    long double los;
+    long double sum;
+    for (int i = 0; i < int(population.size()) / 2; i++) {
+        sum = 0;
+        los = distribution(gen);
+
+        for (const Solution &solution : population) {
+            sum += 1.0 / (long double)solution.path_length;
+            if (sum >= los) {
+                chosen_ones.push_back(solution);
+                break;
+            }
+        }
+    }
+
+    return chosen_ones;
+}
+
+
+bool check_if_contains(vector<int> vector, int liczba) {
+    for (int pole: vector) {
         if (pole == liczba) {
             return true;
         }
@@ -167,155 +199,159 @@ bool czy_zawiera(vector<int> wektor, int liczba) {
     return false;
 }
 
-Osobnik krzyzowanie_OX(Osobnik rodzic1, Osobnik rodzic2) {
-    Osobnik potomek;
-    int rozmiar_drogi = int(populacja[0].droga.size());
+Solution OX_crossover(Solution parent1, Solution parent2) {
+    Solution successor;
+    int path_length = int(population[0].cities.size());
 
-    std::uniform_int_distribution<> distribution(0, rozmiar_drogi - 2);
-    int punkt1 = distribution(gen);
-    int punkt2 = distribution(gen);
+    std::uniform_int_distribution<> distribution(0, path_length - 2);
+    int point1 = distribution(gen);
+    int point2 = distribution(gen);
 
-    // Upewnienie się, że punkt1 < punkt2
-    if (punkt1 > punkt2) {
-        swap(punkt1, punkt2);
+
+    if (point1 > point2) {
+        swap(point1, point2);
     }
 
     // wypełninie potomka -1 (puste pole)
-    for (int i = 0; i < rozmiar_drogi; i++) {
-        potomek.droga.push_back(-1);
+    for (int i = 0; i < path_length; i++) {
+        successor.cities.push_back(-1);
     }
 
     // wstawienie miast do potomka od rodzica pomiędzy punktami cięcia,  takie zielone na slajdzie 17
-    for (int i = punkt1; i <= punkt2; i++) {
-        potomek.droga[i] = rodzic1.droga[i];
+    for (int i = point1; i <= point2; i++) {
+        successor.cities[i] = parent1.cities[i];
     }
 
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 (te miasta co nie zostały pobrane z rodzica 1) z prawej storny
-    vector<int> dostepne_miasta;
-    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
-        if (not czy_zawiera(potomek.droga, rodzic2.droga[i])) {
-            if (not czy_zawiera(dostepne_miasta, rodzic2.droga[i])) {
+    vector<int> available_cities;
+    for (int i = point2 + 1; i < path_length; i++) {
+        if (not check_if_contains(successor.cities, parent2.cities[i])) {
+            if (not check_if_contains(available_cities, parent2.cities[i])) {
 
                 // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
-                dostepne_miasta.push_back(rodzic2.droga[i]);
+                available_cities.push_back(parent2.cities[i]);
             }
         }
     }
 
     //wybranie do osobnego vectora miast ktore mogę wziąść z rodzica2 z lewej storny
-    for (int i = 0; i <= punkt2; i++) {
-        if (not czy_zawiera(potomek.droga, rodzic2.droga[i])) {
-            if (not czy_zawiera(dostepne_miasta, rodzic2.droga[i])) {
+    for (int i = 0; i <= point2; i++) {
+        if (not check_if_contains(successor.cities, parent2.cities[i])) {
+            if (not check_if_contains(available_cities, parent2.cities[i])) {
 
                 // jeśli miasta nie ma w cześci zielonej (slajd 17), dodajemy miasto do dostepnych miast
-                dostepne_miasta.push_back(rodzic2.droga[i]);
+                available_cities.push_back(parent2.cities[i]);
             }
         }
     }
 
 
     // Wypełnienie potomka miastami z rodzica 2 częsci prawej
-    for (int i = punkt2 + 1; i < rozmiar_drogi; i++) {
-        if (potomek.droga[i] == -1) {
+    for (int i = point2 + 1; i < path_length; i++) {
+        if (successor.cities[i] == -1) {
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
-            potomek.droga[i] = dostepne_miasta.front();
-            dostepne_miasta.erase(dostepne_miasta.begin());
+            successor.cities[i] = available_cities.front();
+            available_cities.erase(available_cities.begin());
         }
     }
 
     // Wypełnienie potomka miastami z rodzica 2 częsci lewej
-    for (int i = 0; i < punkt1; i++) {
+    for (int i = 0; i < point1; i++) {
 
-
-        if (potomek.droga[i] == -1) {
+        if (successor.cities[i] == -1) {
 
             // jeśli pole jest puste (-1) oraz miasto się nie powtarza, wpsiujemy miasto
-            potomek.droga[i] = dostepne_miasta.front();
-            dostepne_miasta.erase(dostepne_miasta.begin());
+            successor.cities[i] = available_cities.front();
+            available_cities.erase(available_cities.begin());
         }
     }
 
-    return potomek;
+    return successor;
 }
 
 
-void krzyzowanie() {
-    Osobnik potomek1, potomek2;
+void crossover() {
+    Solution succesor1, succesor2;
 
-    uniform_int_distribution<> distribution(0, int(populacja.size()) - 1);
-    uniform_real_distribution<float> szansa_krzyzowania(0.0f, 1.0f);
+    uniform_int_distribution<> distribution(0, int(population.size()) - 1);
+    uniform_real_distribution<float> crossover_chance(0.0f, 1.0f);
 
-    vector<Osobnik> nowi;
+    vector<Solution> new_ones;
 
-    for (Osobnik osobnik: populacja) {
-        float szansa = szansa_krzyzowania(gen);
+    for (Solution solution: population) {
+        float chance = crossover_chance(gen);
 
-        if (szansa < wsp_krzyzowania) {
+        if (chance < crossover_factor) {
             int rodzic1 = distribution(gen);
             int rodzic2 = distribution(gen);
-            potomek1 = krzyzowanie_OX(populacja[rodzic1], populacja[rodzic2]);
-            nowi.push_back(potomek1);
+            succesor1 = OX_crossover(population[rodzic1], population[rodzic2]);
+            new_ones.push_back(succesor1);
         } else{
-            nowi.push_back(osobnik);
+            new_ones.push_back(solution);
         }
 
     }
 
-    for (Osobnik osobnik: populacja) {
-        float szansa = szansa_krzyzowania(gen);
+    for (Solution solution: population) {
+        float szansa = crossover_chance(gen);
 
-        if (szansa < wsp_krzyzowania) {
-            int rodzic1 = distribution(gen);
-            int rodzic2 = distribution(gen);
-            potomek2 = krzyzowanie_OX(populacja[rodzic2], populacja[rodzic1]);
-            nowi.push_back(potomek2);
+        if (szansa < crossover_factor) {
+            int parent1 = distribution(gen);
+            int parent2 = distribution(gen);
+            succesor2 = OX_crossover(population[parent2], population[parent1]);
+            new_ones.push_back(succesor2);
         } else{
-            nowi.push_back(osobnik);
+            new_ones.push_back(solution);
         }
 
     }
 
-    populacja = nowi;
+    population = new_ones;
 }
 
-void genetyczny(int czas) {
+void genetic(int duration) {
     vector<int> a;
 
     // generacja populacji startowej
-    generuj_startowa_populacja(); // etap 1
+    generate_starting_population(); // etap 1
 
 
     //reset najlepszego osobnika
-    najlepszy_osobnik.reset();
+    best_solution.reset();
 
     // obliczanie czasu dla wątku który odpowiada za warunek stopu
-    auto start = chrono::high_resolution_clock::now();
-    auto stop = start + chrono::seconds(czas);
+    start = chrono::high_resolution_clock::now();
+    auto stop = start + chrono::seconds(duration);
 
-    // start wątku odliczajacego czas do zatrzymania alogrytmu ( warunek stopu )
-    thread thread_warunek_stopu(odliczanie, czas);
+    // start wątku odliczajacego duration do zatrzymania alogrytmu ( warunek stopu )
+    thread thread_timer(timer, duration);
 
     // ocena populacji startowej
-    ocena_populacji();                // etap 2 tylko raz na początku
+    evaluate_population();                // etap 2 tylko raz na początku
 
     while (chrono::high_resolution_clock::now() < stop) {  // etap 3
 
-        ocena_populacji();       // etap 2 każdy kolejny
+        evaluate_population();       // etap 2 każdy kolejny
 
-        populacja = wybranie_rodzicow();     // etap 4
+        if (roulette_ver == 0){
+            population = custom_parent_choosing_method();
+        } else{
+            population = choosing_parent_book_method();
+        }
 
-        krzyzowanie();  // etap 5
 
-        mutacja(); // etap 6
+        crossover();
+
+        mutation();
 
     }
 
-    // czeka aż wątek się skończy
-    thread_warunek_stopu.join();
+
+    thread_timer.join();
 
     // wypisanie najlepszego
-    wypisz_najlepsze();   // etap 7
+    print_best();   // etap 7
 
 
 }

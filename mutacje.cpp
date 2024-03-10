@@ -14,14 +14,14 @@
 
 using namespace std;
 extern float wsp_mutacji;
-extern int metoda_mutacji;
-extern vector<Osobnik> populacja;
+extern int mutation_method;
+extern vector<Solution> population;
 extern mt19937 gen;
 
-void inwersja(Osobnik &osobnik) {
+void invert(Solution &osobnik) {
 
     // Wybieram losowy fragment drogi
-    uniform_int_distribution<int> distribution(0, osobnik.droga.size() - 1);
+    uniform_int_distribution<int> distribution(0, osobnik.cities.size() - 1);
     int punkt1 = distribution(gen);
     int punkt2 = distribution(gen);
 
@@ -31,33 +31,33 @@ void inwersja(Osobnik &osobnik) {
     }
 
     // Odwraca kolejność miast w wybranym fragmencie drogi
-    reverse(osobnik.droga.begin() + punkt1, osobnik.droga.begin() + punkt2 + 1);
+    reverse(osobnik.cities.begin() + punkt1, osobnik.cities.begin() + punkt2 + 1);
 
 }
 
-void mutacja_inwersja() {
-    auto rozmiar_populacji = populacja.size();
-    int liczba_mutacji = static_cast<int>(wsp_mutacji * rozmiar_populacji);
+void invertion_method() {
+    auto population_size = population.size();
+    int mutation_count = static_cast<int>(wsp_mutacji * population_size);
 
-    uniform_int_distribution<int> distribution(0, rozmiar_populacji - 1);
-    for (int i = 0; i < liczba_mutacji; i++) {
-        int wylosowany = distribution(gen);
-        inwersja(populacja[wylosowany]);
+    uniform_int_distribution<int> distribution(0, population_size - 1);
+    for (int i = 0; i < mutation_count; i++) {
+        int random = distribution(gen);
+        invert(population[random]);
     }
 }
 
-void mutacja_swapowanie() {
-    uniform_int_distribution<int> distribution(0, populacja.size() - 1);
-    int punkt1 = distribution(gen);
-    int punkt2 = distribution(gen);
-    swap(populacja[punkt1], populacja[punkt2]);
+void swapping_method() {
+    uniform_int_distribution<int> distribution(0, population.size() - 1);
+    int point1 = distribution(gen);
+    int point2 = distribution(gen);
+    swap(population[point1], population[point2]);
 }
 
-void mutacja() {
-    if (metoda_mutacji == 0) {
-        mutacja_inwersja();
+void mutation() {
+    if (mutation_method == 0) {
+        invertion_method();
     }
-    if (metoda_mutacji == 1) {
-        mutacja_swapowanie();
+    if (mutation_method == 1) {
+        swapping_method();
     }
 }

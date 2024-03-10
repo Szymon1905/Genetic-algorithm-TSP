@@ -6,10 +6,10 @@
 using namespace std;
 
 
-void inwersja(Osobnik &osobnik);
+void invert(Solution &osobnik);
 
-void mutacja_inwersja();
+void invertion_method();
 
-void mutacja_swapowanie();
+void swapping_method();
 
-void mutacja();
+void mutation();

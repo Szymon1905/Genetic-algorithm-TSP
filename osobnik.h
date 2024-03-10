@@ -4,14 +4,14 @@
 
 using namespace std;
 
-class Osobnik {
+class Solution {
 public:
-    vector<int> droga;
-    int dlugosc_drogi;
+    vector<int> cities;
+    int path_length;
 
-    Osobnik(vector<int> trasa, int dlugosc_trasy);
+    Solution(vector<int> path, int path_length);
 
-    Osobnik();
+    Solution();
 
 
     void reset();

@@ -5,14 +5,14 @@
 using namespace std;
 
 
-Osobnik::Osobnik(vector<int> trasa, int dlugosc_trasy) {
-    this->droga = trasa;
-    this->dlugosc_drogi = dlugosc_trasy;
+Solution::Solution(vector<int> path, int path_length) {
+    this->cities = path;
+    this->path_length = path_length;
 }
 
-Osobnik::Osobnik() {}
+Solution::Solution() {}
 
-void Osobnik::reset() {
-    this->droga.clear();
-    this->dlugosc_drogi = INFINITY;
+void Solution::reset() {
+    this->cities.clear();
+    this->path_length = INFINITY;
 }

@@ -21,9 +21,9 @@ vector<vector<int>> global_macierz;
 int czas=10;
 int startowa_wielkosc_populacji = 500;
 float wsp_mutacji = 0.01;
-float wsp_krzyzowania = 0.8;
-int metoda_mutacji = 0;
-int sposob_krzyzowania = 1;
+float crossover_factor = 0.8;
+int mutation_method = 0;
+int roulette_ver = 0;
 string nazwa_wczytanej_macierzy = "";
 
 
@@ -60,39 +60,43 @@ vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
 
 int main() {
     SetConsoleOutputCP(CP_UTF8); // Konsola ustawiona na utf-8 aby były Polskie litery
-    cout<<"Autor: Szymon Borzdyński"<<endl;
-    int opcja;
+    cout<<"Author: Szymon Borzdyński"<<endl;
+    int option;
 
-    string nazwa;
+    string name;
 
 
     while(true){
         cout << "Opcje:  [] <- obecna wartość parametru" << endl;
         cout << "0 - wczytaj macierz["<<nazwa_wczytanej_macierzy<<"]" << endl;
         cout << "1 - kryterium stopu[" << czas <<"]"<<endl;
-        cout << "2 - populacja startowa[" << startowa_wielkosc_populacji <<"]"<< endl;
+        cout << "2 - population startowa[" << startowa_wielkosc_populacji <<"]"<< endl;
         cout << "3 - współczynnik mutacji[" << wsp_mutacji <<"]"<< endl;
-        if(metoda_mutacji == 0){
-            cout << "4 - typ mutacji[inwersja]"<< endl;
+        if(mutation_method == 0){
+            cout << "4 - typ mutacji[invert]"<< endl;
         } else{
             cout << "4 - typ mutacji[swapowanie]"<< endl;
         }
-        cout << "5 - współczynnik krzyżowania[" << wsp_krzyzowania <<"]" << endl;
+        cout << "5 - współczynnik krzyżowania[" << crossover_factor << "]" << endl;
         cout << "6 - algorytm genetyczny" << endl;
-        cout << "7 - algorytm genetyczny TEST 10" << endl;
-        cout << "8 - algorytm genetyczny TEST 20" << endl;
-        cin>>opcja;
+        cout << "7 - Roulette method[";
+        if(roulette_ver == 0){
+            cout << "Custom (Recommended)]"<< endl;
+        } else{
+            cout << "Book]"<< endl;
+        }
+        cin >> option;
 
-        switch (opcja) {
+        switch (option) {
             default:
                 system("CLS");
-                cout << "Błędna opcja" << endl << endl;
-                cin >> opcja;
+                cout << "Invalid option" << endl << endl;
+                cin >> option;
                 break;
             case 0:
                 cout<<"Podaj nazwę pliku: "<<endl;
-                cin>>nazwa;
-                global_macierz = wczytaj_macierz(nazwa);
+                cin >> name;
+                global_macierz = wczytaj_macierz(name);
                 system("CLS");
                 break;
             case 1:
@@ -111,18 +115,18 @@ int main() {
                 break;
             case 4:
                 cout<<"Podaj typ mutacji: "<<endl;
-                cout<<"0 - inwersja"<<endl;  //Mutacja przez inwersję (Inversion Mutation):
+                cout<<"0 - invert"<<endl;  //Mutacja przez inwersję (Inversion Mutation):
                 cout<<"1 - swapowanie"<<endl;  // Mutacja przez zamianę (Swap Mutation):
-                cin >> metoda_mutacji;
-                while(metoda_mutacji != 0 and metoda_mutacji != 1){
+                cin >> mutation_method;
+                while(mutation_method != 0 and mutation_method != 1){
                     cout<<"błędny parametr, podaj ponownie "<<endl;
-                    cin >> metoda_mutacji;
+                    cin >> mutation_method;
                 }
                 system("CLS");
                 break;
             case 5:
                 cout<<"Podaj wartość współczynnika krzyżowania: "<<endl;
-                cin >> wsp_krzyzowania;
+                cin >> crossover_factor;
                 break;
             case 6:
                 if(global_macierz.empty()){
@@ -130,19 +134,15 @@ int main() {
                     break;
                 }
                 cout<<"Start algorytmu"<<endl;
-                genetyczny(czas);
+                genetic(czas);
                 break;
             case 7:
-                cout<<"TEST "<<endl;
-                global_macierz = wczytaj_macierz("tsp_10.txt");
-                genetyczny(czas);
+                cout<<"Podaj wersje ruletki: "<<endl;
+                cout<<" 0 - Własna"<<endl;
+                cout<<" 1 - Literaturowa"<<endl;
+                cin >> roulette_ver;
                 break;
             case 8:
-                cout<<"TEST "<<endl;
-                global_macierz = wczytaj_macierz("tsp_20.txt");
-                genetyczny(czas);
-                break;
-            case 9:
                 return 0;
         }
     }
