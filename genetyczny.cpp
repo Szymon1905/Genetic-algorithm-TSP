@@ -8,11 +8,11 @@
 #include "mutacje.h"
 
 
-extern int global_liczba_miast;
-extern int startowa_wielkosc_populacji;
+extern int global_city_count;
+extern int starting_population_size;
 extern float crossover_factor;
-extern float wsp_mutacji;
-extern vector<vector<int>> global_macierz;
+extern float mutation_rate;
+extern vector<vector<int>> global_matrix;
 extern float mutation_method;
 extern int roulette_ver;
 
@@ -62,7 +62,7 @@ void generate_starting_population() {
 
     // generate cities / cities
     vector<int> cities;
-    for (int i = 0; i < global_liczba_miast; i++) {
+    for (int i = 0; i < global_city_count; i++) {
         cities.push_back(i);
     }
 
@@ -70,14 +70,14 @@ void generate_starting_population() {
     population.clear();
 
     // generating random permutations of cities by the shuffle method and inserting them into the starting population
-    for (int i = 0; i < startowa_wielkosc_populacji; i++) {
+    for (int i = 0; i < starting_population_size; i++) {
         shuffle(cities.begin(), cities.end(), gen);
         Solution solution = Solution(cities, INT32_MAX);
         population.push_back(solution);
     }
 
     for (Solution &solution: population) {
-        solution.path_length = calculate_path_length(cities, global_macierz);
+        solution.path_length = calculate_path_length(cities, global_matrix);
     }
 
 }
@@ -99,7 +99,7 @@ void evaluate_population() {
 
 
         // calcaltion of path length
-        solution.path_length = calculate_path_length(solution.cities, global_macierz);
+        solution.path_length = calculate_path_length(solution.cities, global_matrix);
 
         // compare with current best solution
         if (solution.path_length < best_solution.path_length) {

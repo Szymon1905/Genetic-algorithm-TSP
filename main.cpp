@@ -13,53 +13,52 @@
 using namespace std;
 
 
-// globalne ustawienia
 
-int global_liczba_miast;
-vector<vector<int>> global_macierz;
+int global_city_count;
+vector<vector<int>> global_matrix;
 
-int czas=10;
-int startowa_wielkosc_populacji = 500;
-float wsp_mutacji = 0.01;
+int stop_time=10;
+int starting_population_size = 500;
+float mutation_rate = 0.01;
 float crossover_factor = 0.8;
 int mutation_method = 0;
 int roulette_ver = 0;
-string nazwa_wczytanej_macierzy = "";
+string name_of_matrix = "";
 
 
-vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
+vector<vector<int>> read_matrix(const string& file_name) {
 
-    ifstream plikWejsciowy;  // na odczyt pliku
+    ifstream input_file;
 
-    plikWejsciowy.open(daneWejsciowe);    // otwieram plik
-    if (plikWejsciowy.is_open()) {          // sprawdzam czy plik poprawnie otwarty
-        cout << "Otwarto plik " << daneWejsciowe << endl;
-        nazwa_wczytanej_macierzy = daneWejsciowe;
+    input_file.open(file_name);
+    if (input_file.is_open()) {
+        cout << "File opened " << file_name << endl;
+        name_of_matrix = file_name;
     } else {
-        cout << "Nie udało się otworzyć pliku wejściowego" << endl;
+        cout << "Unable ot open file" << endl;
         return {};
     }
-    int liczba_miast;
-    plikWejsciowy >> liczba_miast; // wczytanie liczby miast
+    int city_count;
+    input_file >> city_count;
 
-    vector<vector<int> > macierz(liczba_miast, vector<int>(liczba_miast));   // macierz na przechowanie danych z pliku
+    vector<vector<int> > matrix(city_count, vector<int>(city_count));
 
-    for (int i = 0; i < liczba_miast; ++i) {    // wpisywanie do macierzy
-        for (int j = 0; j < liczba_miast; ++j) {
-            plikWejsciowy >> macierz[i][j];
+    for (int i = 0; i < city_count; ++i) {
+        for (int j = 0; j < city_count; ++j) {
+            input_file >> matrix[i][j];
         }
     }
-    plikWejsciowy.close();   // zamykam plik
+    input_file.close();
 
-    global_liczba_miast = liczba_miast;
-    return macierz;
+    global_city_count = city_count;
+    return matrix;
 }
 
 
 
 
 int main() {
-    SetConsoleOutputCP(CP_UTF8); // Konsola ustawiona na utf-8 aby były Polskie litery
+    SetConsoleOutputCP(CP_UTF8);
     cout<<"Author: Szymon Borzdyński"<<endl;
     int option;
 
@@ -67,18 +66,18 @@ int main() {
 
 
     while(true){
-        cout << "Opcje:  [] <- obecna wartość parametru" << endl;
-        cout << "0 - wczytaj macierz["<<nazwa_wczytanej_macierzy<<"]" << endl;
-        cout << "1 - kryterium stopu[" << czas <<"]"<<endl;
-        cout << "2 - population startowa[" << startowa_wielkosc_populacji <<"]"<< endl;
-        cout << "3 - współczynnik mutacji[" << wsp_mutacji <<"]"<< endl;
+        cout << "Options:  [] <- current param value" << endl;
+        cout << "0 - read matrix[" << name_of_matrix << "]" << endl;
+        cout << "1 - stop criteria [" << stop_time << "]" << endl;
+        cout << "2 - starting population size[" << starting_population_size << "]" << endl;
+        cout << "3 - mutation rate[" << mutation_rate << "]" << endl;
         if(mutation_method == 0){
             cout << "4 - typ mutacji[invert]"<< endl;
         } else{
             cout << "4 - typ mutacji[swapowanie]"<< endl;
         }
-        cout << "5 - współczynnik krzyżowania[" << crossover_factor << "]" << endl;
-        cout << "6 - algorytm genetyczny" << endl;
+        cout << "5 - crossover factor[" << crossover_factor << "]" << endl;
+        cout << "6 - Start the genetic algorithm" << endl;
         cout << "7 - Roulette method[";
         if(roulette_ver == 0){
             cout << "Custom (Recommended)]"<< endl;
@@ -94,52 +93,52 @@ int main() {
                 cin >> option;
                 break;
             case 0:
-                cout<<"Podaj nazwę pliku: "<<endl;
+                cout<<"Enter the file name: "<<endl;
                 cin >> name;
-                global_macierz = wczytaj_macierz(name);
+                global_matrix = read_matrix(name);
                 system("CLS");
                 break;
             case 1:
                 cout<<"Podaj kryterium stopu w sekundach: "<<endl;
-                cin>>czas;
+                cin >> stop_time;
                 break;
             case 2:
-                cout<<"Podaj wielkość populacji startowej: "<<endl;
-                cin>>startowa_wielkosc_populacji;
+                cout<<"Specify the stop criterion in seconds: "<<endl;
+                cin >> starting_population_size;
                 system("CLS");
                 break;
             case 3:
-                cout<<"Podaj wartość współczynnika mutacji: "<<endl;
-                cin >> wsp_mutacji;
+                cout<<"Enter the value of the mutation rate: "<<endl;
+                cin >> mutation_rate;
                 system("CLS");
                 break;
             case 4:
-                cout<<"Podaj typ mutacji: "<<endl;
-                cout<<"0 - invert"<<endl;  //Mutacja przez inwersję (Inversion Mutation):
-                cout<<"1 - swapowanie"<<endl;  // Mutacja przez zamianę (Swap Mutation):
+                cout<<"Specify the type of mutation: "<<endl;
+                cout<<"0 - invert"<<endl;  // (Inversion Mutation):
+                cout<<"1 - swapping"<<endl;  //  (Swap Mutation):
                 cin >> mutation_method;
                 while(mutation_method != 0 and mutation_method != 1){
-                    cout<<"błędny parametr, podaj ponownie "<<endl;
+                    cout<<"invlaid param, "<<endl;
                     cin >> mutation_method;
                 }
                 system("CLS");
                 break;
             case 5:
-                cout<<"Podaj wartość współczynnika krzyżowania: "<<endl;
+                cout<<"Enter the value of the crossover factor: "<<endl;
                 cin >> crossover_factor;
                 break;
             case 6:
-                if(global_macierz.empty()){
-                    cout<<"pusta macierz"<<endl;
+                if(global_matrix.empty()){
+                    cout<<"empty matrix"<<endl;
                     break;
                 }
-                cout<<"Start algorytmu"<<endl;
-                genetic(czas);
+                cout<<"Start of algorithm"<<endl;
+                genetic(stop_time);
                 break;
             case 7:
-                cout<<"Podaj wersje ruletki: "<<endl;
-                cout<<" 0 - Własna"<<endl;
-                cout<<" 1 - Literaturowa"<<endl;
+                cout<<"Enter the roulette version: "<<endl;
+                cout<<" 0 - Custom (recommended)"<<endl;
+                cout<<" 1 - Book"<<endl;
                 cin >> roulette_ver;
                 break;
             case 8:

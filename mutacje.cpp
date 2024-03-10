@@ -13,7 +13,7 @@
 #include <unordered_set>
 
 using namespace std;
-extern float wsp_mutacji;
+extern float mutation_rate;
 extern int mutation_method;
 extern vector<Solution> population;
 extern mt19937 gen;
@@ -37,7 +37,7 @@ void invert(Solution &osobnik) {
 
 void invertion_method() {
     auto population_size = population.size();
-    int mutation_count = static_cast<int>(wsp_mutacji * population_size);
+    int mutation_count = static_cast<int>(mutation_rate * population_size);
 
     uniform_int_distribution<int> distribution(0, population_size - 1);
     for (int i = 0; i < mutation_count; i++) {
