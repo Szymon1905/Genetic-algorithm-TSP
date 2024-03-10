@@ -8,119 +8,138 @@
 #include <chrono>
 #include <Windows.h>
 #include <thread>
-# include "genetyczny.h"
+#include "genetyczny.h"
 
 using namespace std;
 
 
-// globalne ustawienia
 
-int global_liczba_miast;
-vector<vector<int>> global_macierz;
+int global_city_count;
+vector<vector<int>> global_matrix;
 
-int czas=6;
-int startowa_wielkosc_populacji = 500;
-float wsp_mutacji = 0.01;
-float wsp_krzyzowania = 0.8;
-int sposob_mutacji = 1;
-int sposob_krzyzowania = 1;
+int stop_time=10;
+int starting_population_size = 500;
+float mutation_rate = 0.01;
+float crossover_factor = 0.8;
+int mutation_method = 0;
+int roulette_ver = 0;
+string name_of_matrix = "";
 
 
+vector<vector<int>> read_matrix(const string& file_name) {
 
-vector<vector<int>> wczytaj_macierz(const string& daneWejsciowe) {
+    ifstream input_file;
 
-    ifstream plikWejsciowy;  // na odczyt pliku
-
-    plikWejsciowy.open(daneWejsciowe);    // otwieram plik
-    if (plikWejsciowy.is_open()) {          // sprawdzam czy plik poprawnie otwarty
-        cout << "Otwarto plik " << daneWejsciowe << endl;
+    input_file.open(file_name);
+    if (input_file.is_open()) {
+        cout << "File opened " << file_name << endl;
+        name_of_matrix = file_name;
     } else {
-        cout << "Nie udało się otworzyć pliku wejściowego" << endl;
-        exit(-1);
+        cout << "Unable ot open file" << endl;
+        return {};
     }
-    int liczba_miast;
-    plikWejsciowy >> liczba_miast; // wczytanie liczby miast
+    int city_count;
+    input_file >> city_count;
 
-    vector<vector<int> > macierz(liczba_miast, vector<int>(liczba_miast));   // macierz na przechowanie danych z pliku
+    vector<vector<int> > matrix(city_count, vector<int>(city_count));
 
-    for (int i = 0; i < liczba_miast; ++i) {    // wpisywanie do macierzy
-        for (int j = 0; j < liczba_miast; ++j) {
-            plikWejsciowy >> macierz[i][j];
+    for (int i = 0; i < city_count; ++i) {
+        for (int j = 0; j < city_count; ++j) {
+            input_file >> matrix[i][j];
         }
     }
-    plikWejsciowy.close();   // zamykam plik
+    input_file.close();
 
-    global_liczba_miast = liczba_miast;
-    return macierz;
+    global_city_count = city_count;
+    return matrix;
 }
 
 
 
 
 int main() {
-    SetConsoleOutputCP(CP_UTF8); // Konsola ustawiona na utf-8 aby były Polskie litery
-    cout<<"Autor: Szymon Borzdyński"<<endl;
-    int opcja;
+    SetConsoleOutputCP(CP_UTF8);
+    cout<<"Author: Szymon Borzdyński"<<endl;
+    int option;
 
-    string nazwa;
+    string name;
 
 
     while(true){
-        cout << "Opcje:  [] - wartość domyślna" << endl;
-        cout << "0 - wczytaj macierz" << endl;
-        cout << "1 - kryterium stopu [60]" << endl;
-        cout << "2 - populacja startowa" << endl;
-        cout << "3 - współczynnik mutacji" << endl;
-        cout << "4 - współczynnik krzyżowania" << endl;
-        cout << "5 - algorytm genetyczny" << endl;
-        cout << "6 - algorytm genetyczny TEST 5" << endl;
-        cout << "7 - algorytm genetyczny TEST 10" << endl;
-        cin>>opcja;
+        cout << "Options:  [] <- current param value" << endl;
+        cout << "0 - read matrix[" << name_of_matrix << "]" << endl;
+        cout << "1 - stop criteria [" << stop_time << "]" << endl;
+        cout << "2 - starting population size[" << starting_population_size << "]" << endl;
+        cout << "3 - mutation rate[" << mutation_rate << "]" << endl;
+        if(mutation_method == 0){
+            cout << "4 - typ mutacji[invert]"<< endl;
+        } else{
+            cout << "4 - typ mutacji[swapowanie]"<< endl;
+        }
+        cout << "5 - crossover factor[" << crossover_factor << "]" << endl;
+        cout << "6 - Start the genetic algorithm" << endl;
+        cout << "7 - Roulette method[";
+        if(roulette_ver == 0){
+            cout << "Custom (Recommended)]"<< endl;
+        } else{
+            cout << "Book]"<< endl;
+        }
+        cin >> option;
 
-        switch (opcja) {
+        switch (option) {
             default:
                 system("CLS");
-                cout << "Błędna opcja" << endl << endl;
-                cin >> opcja;
+                cout << "Invalid option" << endl << endl;
+                cin >> option;
                 break;
             case 0:
-                cout<<"Podaj nazwę pliku: "<<endl;
-                cin>>nazwa;
-                global_macierz = wczytaj_macierz(nazwa);
+                cout<<"Enter the file name: "<<endl;
+                cin >> name;
+                global_matrix = read_matrix(name);
+                system("CLS");
                 break;
             case 1:
                 cout<<"Podaj kryterium stopu w sekundach: "<<endl;
-                cin>>czas;
-
+                cin >> stop_time;
                 break;
             case 2:
-                cout<<"Podaj wielkość populacji startowej[500]: "<<endl;
-                cin>>startowa_wielkosc_populacji;
-
+                cout<<"Specify the stop criterion in seconds: "<<endl;
+                cin >> starting_population_size;
+                system("CLS");
                 break;
             case 3:
-                cout<<"Podaj wartość współczynnika mutacji[0.01]: "<<endl;
-                cin >> wsp_mutacji;
-
+                cout<<"Enter the value of the mutation rate: "<<endl;
+                cin >> mutation_rate;
+                system("CLS");
                 break;
             case 4:
-                cout<<"Podaj wartość współczynnika krzyżowania[0.8]: "<<endl;
-                cin >> wsp_krzyzowania;
-
+                cout<<"Specify the type of mutation: "<<endl;
+                cout<<"0 - invert"<<endl;  // (Inversion Mutation):
+                cout<<"1 - swapping"<<endl;  //  (Swap Mutation):
+                cin >> mutation_method;
+                while(mutation_method != 0 and mutation_method != 1){
+                    cout<<"invlaid param, "<<endl;
+                    cin >> mutation_method;
+                }
+                system("CLS");
                 break;
             case 5:
-                cout<<"Start algorytmu"<<endl;
-                genetyczny(czas);
+                cout<<"Enter the value of the crossover factor: "<<endl;
+                cin >> crossover_factor;
                 break;
             case 6:
-                cout<<"TEST "<<endl;
-                global_macierz = wczytaj_macierz("tsp_5.txt");
-                genetyczny(czas);
+                if(global_matrix.empty()){
+                    cout<<"empty matrix"<<endl;
+                    break;
+                }
+                cout<<"Start of algorithm"<<endl;
+                genetic(stop_time);
                 break;
             case 7:
-                cout<<"TEST "<<endl;
-                global_macierz = wczytaj_macierz("tsp_10.txt");
-                genetyczny(czas);
+                cout<<"Enter the roulette version: "<<endl;
+                cout<<" 0 - Custom (recommended)"<<endl;
+                cout<<" 1 - Book"<<endl;
+                cin >> roulette_ver;
                 break;
             case 8:
                 return 0;

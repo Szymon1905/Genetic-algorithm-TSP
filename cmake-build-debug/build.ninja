@@ -61,12 +61,6 @@ build CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj: CXX_COMPILER__PEA_genety
   OBJECT_DIR = CMakeFiles\PEA_genetyczny.dir
   OBJECT_FILE_DIR = CMakeFiles\PEA_genetyczny.dir
 
-build CMakeFiles/PEA_genetyczny.dir/testy.cpp.obj: CXX_COMPILER__PEA_genetyczny_unscanned_Debug C$:/Users/Szymon/CLionProjects/PEA_genetyczny/testy.cpp || cmake_object_order_depends_target_PEA_genetyczny
-  DEP_FILE = CMakeFiles\PEA_genetyczny.dir\testy.cpp.obj.d
-  FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\PEA_genetyczny.dir
-  OBJECT_FILE_DIR = CMakeFiles\PEA_genetyczny.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target PEA_genetyczny
@@ -75,8 +69,9 @@ build CMakeFiles/PEA_genetyczny.dir/testy.cpp.obj: CXX_COMPILER__PEA_genetyczny_
 #############################################
 # Link the executable PEA_genetyczny.exe
 
-build PEA_genetyczny.exe: CXX_EXECUTABLE_LINKER__PEA_genetyczny_Debug CMakeFiles/PEA_genetyczny.dir/main.cpp.obj CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj CMakeFiles/PEA_genetyczny.dir/testy.cpp.obj
+build PEA_genetyczny.exe: CXX_EXECUTABLE_LINKER__PEA_genetyczny_Debug CMakeFiles/PEA_genetyczny.dir/main.cpp.obj CMakeFiles/PEA_genetyczny.dir/genetyczny.cpp.obj
   FLAGS = -g
+  LINK_FLAGS = -static
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\PEA_genetyczny.dir
   POST_BUILD = cd .

@@ -1,14 +1,25 @@
 #include <iostream>
 #include <vector>
-
+#include <algorithm>
+#include <ctime>
+#include <cstdlib>
+#include <limits>
+#include <fstream>
+#include <chrono>
+#include <thread>
+#include <random>
+#include <unordered_set>
 
 
 using namespace std;
 
-vector<int> genetyczny(int);
+void genetic(int);
 
-void ocena_populacji();
+void evaluate_population();
 
-void generuj_startowa_populacja();
+void generate_starting_population();
 
-int oblicz_koszt_drogi(const vector<int>& rozwionzanie, vector<vector<int>> macierz2);
+int calculate_path_length(const vector<int> &solution, vector<vector<int>> matrix);
+
+
+
