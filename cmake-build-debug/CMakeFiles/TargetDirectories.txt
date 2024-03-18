@@ -1,3 +1,0 @@
-C:/Users/Dom/CLionProjects/Algorytm_Genetyczny_PEA/cmake-build-debug/CMakeFiles/PEA_genetyczny.dir
-C:/Users/Dom/CLionProjects/Algorytm_Genetyczny_PEA/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Dom/CLionProjects/Algorytm_Genetyczny_PEA/cmake-build-debug/CMakeFiles/rebuild_cache.dir
